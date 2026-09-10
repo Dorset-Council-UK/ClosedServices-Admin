@@ -1,0 +1,75 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Sections
+@inherits LayoutComponentBase
+
+<GdsSkipLink Href="@GetSkipLinkHref()" />
+
+<GdsHeader ServiceName="Closed Services" ServiceUrl="" LogoUrl="https://gistaticprod.blob.core.windows.net/giframeworkmaps/version-logos/Dorset council logo_white_d.svg">
+    <NavLinks>
+        @* <AuthorizeView>
+            <Authorized>
+                <GdsHeaderNavLink Href="account/myaccount" Match="NavLinkMatch.All">My account</GdsHeaderNavLink>
+                <GdsHeaderNavLink Href="signout" Match="NavLinkMatch.All">Sign out</GdsHeaderNavLink>
+            </Authorized>
+            <NotAuthorized>
+                <GdsHeaderNavLink Href="@_signInUrl" Match="NavLinkMatch.All">Sign in</GdsHeaderNavLink>
+            </NotAuthorized>
+        </AuthorizeView> *@
+    </NavLinks>
+</GdsHeader>
+<GdsContainer AdditionalCssClasses="flex-fill">
+    <SectionOutlet SectionName="Layout.GdsBreadcrumbs" />
+
+    <GdsMainWrapper AdditionalCssClasses="govuk-body govuk-main-wrapper--l" AutoSpacing id="main-content" role="main">
+
+        @if (Env.IsProduction())
+        {
+            <GdsErrorBoundary>
+                @Body
+            </GdsErrorBoundary>
+        }
+        else
+        {
+            <GdsErrorBoundary ShowErrorMessage ShowHelpLink ShowRetryButton>
+                @Body
+            </GdsErrorBoundary>
+        }
+    </GdsMainWrapper>
+</GdsContainer>
+
+<GdsFooter>
+    <Meta>
+    <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
+        <GdsLink class="govuk-footer__link govuk-link-image" Href="/" title="Closed Services Admin">
+            Closed Services Admin
+        </GdsLink>
+    </div>
+    <div class="govuk-footer__meta-item">
+        <div>Dorset Council</div>
+    </div>
+</Meta>
+</GdsFooter>
+
+@code {
+    [Inject]
+    private IWebHostEnvironment Env { get; set; } = default!;
+
+    [Inject]
+    private NavigationManager Navigation { get; set; } = default!;
+
+    private GdsPhaseBanner.Phases _phase => Env.IsProduction() ? GdsPhaseBanner.Phases.Alpha : GdsPhaseBanner.Phases.Development;
+    // private string _signInUrl
+    // {
+    //     get
+    //     {
+    //         var redirectUri = Navigation.SignInRedirectUri;
+    //         return string.IsNullOrWhiteSpace(redirectUri) ? "signin" : $"signin?redirectUri={redirectUri}";
+    //     }
+    // }
+
+    private string GetSkipLinkHref()
+    {
+        var currentUri = new Uri(Navigation.Uri);
+        return $"{currentUri.PathAndQuery}#main-content";
+    }
+}

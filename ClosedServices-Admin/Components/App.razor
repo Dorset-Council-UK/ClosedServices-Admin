@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+<html lang="en-GB" class="govuk-template--rebranded">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <ResourcePreloader />
+    <link rel="stylesheet" href="@Assets["_content/Dorset-Council-UK.GdsBlazorComponents/gds.css"]">
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["ClosedServices-Admin.styles.css"]" />
+    <ImportMap />
+    <HeadOutlet />
+</head>
+
+<body class="govuk-template__body govuk-frontend-supported">
+    <GdsSkipLink Href="#main-content" />
+    <Routes @rendermode="InteractiveServer" />
+    <GdsReconnectModal />
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script type="module" src="@Assets["_content/Dorset-Council-UK.GdsBlazorComponents/gds.js"]"></script>
+
+</body>
+
+</html>
