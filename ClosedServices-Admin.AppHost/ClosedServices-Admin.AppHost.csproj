@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClosedServices-Admin\ClosedServices-Admin.csproj" />
+    <ProjectReference Include="..\ClosedServices-Admin.Web\ClosedServices-Admin.Web.csproj" />
   </ItemGroup>
 
 </Project>
