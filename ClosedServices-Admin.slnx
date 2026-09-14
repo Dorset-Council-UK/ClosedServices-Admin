@@ -1,5 +1,5 @@
 <Solution>
   <Project Path="ClosedServices-Admin.AppHost/ClosedServices-Admin.AppHost.csproj" />
   <Project Path="ClosedServices-Admin.ServiceDefaults/ClosedServices-Admin.ServiceDefaults.csproj" />
-  <Project Path="ClosedServices-Admin/ClosedServices-Admin.csproj" />
+  <Project Path="ClosedServices-Admin.Web/ClosedServices-Admin.Web.csproj" />
 </Solution>
