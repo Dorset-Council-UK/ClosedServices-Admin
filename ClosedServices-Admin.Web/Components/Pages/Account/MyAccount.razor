@@ -1,0 +1,103 @@
+﻿@page "/account/my-account"
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+
+<PageTitle>Manage your account</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <GdsHeading Level="1">Manage your account</GdsHeading>
+        <p>Your account details and password are managed by your identity provider.</p>
+        <table class="govuk-table">
+            <caption class="govuk-table__caption govuk-table__caption--m">Basic details</caption>
+            <tbody class="govuk-table__body">
+                <tr class="govuk-table__row">
+                    <th scope="row" class="govuk-table__header">Display Name</th>
+                    <td class="govuk-table__cell">@UserDisplayName</td>
+                </tr>
+                <tr class="govuk-table__row">
+                    <th scope="row" class="govuk-table__header">Email</th>
+                    <td class="govuk-table__cell">@UserPrimaryEmailAddress</td>
+                </tr>
+                <tr class="govuk-table__row">
+                    <th scope="row" class="govuk-table__header">User ID</th>
+                    <td class="govuk-table__cell">@UserID</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <GdsHeading Level="2">Your roles</GdsHeading>
+        <p>
+            These are the roles that have been assigned to you by your system administrator. They control what you can and can't do in the app.
+        </p>
+        @if (UserRoles is not null && UserRoles.Any())
+        {
+            <ul class="govuk-list govuk-list--bullet">
+                @foreach (Claim role in UserRoles)
+                {
+                    <li>@role.Value</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <GdsWarning Text="You have no assigned roles." />
+        }
+
+        <details class="govuk-details">
+            <summary class="govuk-details__summary">
+                <span class="govuk-details__summary-text">
+                    Detailed authorisation claims (for support and debugging purposes)
+                </span>
+            </summary>
+            <div class="govuk-details__text">
+                @if (UserClaims is not null)
+                {
+                <GdsTable T="Claim" Items="@UserClaims" Caption="User's authorisation claims" CaptionTextSize="GdsSize.Medium">
+                    <HeaderContent>
+                        <GdsTableTh>Type</GdsTableTh>
+                        <GdsTableTh>Value</GdsTableTh>
+                    </HeaderContent>
+                    <RowTemplate Context="item">
+                        <GdsTableTd Value="@item.Type" />
+                        <GdsTableTd Value="@item.Value" />
+                    </RowTemplate>
+                </GdsTable>
+                }
+                else
+                {
+                    <GdsWarning Text="No authorisation claims found." />
+                }
+            </div>
+        </details>
+
+    </Authorized>
+    <NotAuthorized>
+        <GdsWarning Text="You are not signed in." />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private string? UserID{ get; set; }
+    private string? UserDisplayName{ get; set; }
+    private string? UserPrimaryEmailAddress { get; set; }
+    private IEnumerable<System.Security.Claims.Claim>? UserClaims{ get; set; }
+    private IEnumerable<System.Security.Claims.Claim>? UserRoles { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask != null)
+        {
+            var authState = await AuthenticationStateTask;
+
+            UserID = authState.User.UserId;
+            UserDisplayName = authState.User.DisplayName;
+            UserPrimaryEmailAddress = authState.User.Email;
+            UserClaims = authState.User.Claims;
+            UserRoles = UserClaims.Where(c => c.Type == ClaimTypes.Role);
+        }
+    }
+}

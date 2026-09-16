@@ -1,5 +1,23 @@
 ﻿@page "/"
+@attribute [AllowAnonymous]
 
 <PageTitle>Closed Services Admin</PageTitle>
 
 <GdsHeading Level="1" Size="GdsSize.Large">Closed Services Admin</GdsHeading>
+
+<p>Welcome to the Closed Services Admin portal.</p>
+
+<AuthorizeView>
+    <Authorized>
+        <p>You have permission to update the following services.</p>
+        <p>[List of services goes here]</p>
+    </Authorized>
+    <NotAuthorized>
+        <p><GdsLink Href="/sign-in">Sign in</GdsLink> to update your service</p>
+        <GdsHeading Level="2" Size="GdsSize.Medium">What is Closed Services Admin?</GdsHeading>
+        <p>Closed Services Admin is a portal that allows authorized users to manage and update closed services within the organization.</p>
+        <p>If you manage a service, and don't have an account, you can request access by contacting [contact goes here].</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+

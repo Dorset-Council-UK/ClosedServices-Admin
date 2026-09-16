@@ -1,14 +1,26 @@
-﻿<!DOCTYPE html>
+﻿@using ClosedServices_Admin_Shared.Options;
+@using Microsoft.Extensions.Options
+
+@inject IOptions<ClosedServicesOptions> ClosedServicesOptions
+
+<!DOCTYPE html>
 <html lang="en-GB" class="govuk-template--rebranded">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/" />
+    <base href="/@(_closedServicesOptions.PathBase)" />
     <ResourcePreloader />
     <link rel="stylesheet" href="@Assets["_content/Dorset-Council-UK.GdsBlazorComponents/gds.css"]">
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["ClosedServices-Admin.styles.css"]" />
+    <link rel="icon" href="@IconsRoot/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="@IconsRoot/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="@IconsRoot/apple-touch-icon.png" />
+    @if (!string.IsNullOrEmpty(IconsRoot))
+    {
+        <link rel="manifest" href="@IconsRoot/manifest.webmanifest" />
+    }
     <ImportMap />
     <HeadOutlet />
 </head>
@@ -23,3 +35,8 @@
 </body>
 
 </html>
+
+@code {
+    private ClosedServicesOptions _closedServicesOptions => ClosedServicesOptions.Value;
+    private string IconsRoot => _closedServicesOptions.Theme.IconsRoot;
+}

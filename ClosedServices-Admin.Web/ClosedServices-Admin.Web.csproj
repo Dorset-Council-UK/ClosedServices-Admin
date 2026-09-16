@@ -7,6 +7,7 @@
     <RootNamespace>ClosedServices_Admin</RootNamespace>
     <AssemblyName>$(AssemblyName.Replace(' ', '_'))</AssemblyName>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <UserSecretsId>5f2d2d6d-a208-4739-8aa4-35f3d92f6eb2</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

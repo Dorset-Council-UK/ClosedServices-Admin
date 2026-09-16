@@ -6,15 +6,15 @@
 
 <GdsHeader ServiceName="Closed Services" ServiceUrl="" LogoUrl="https://gistaticprod.blob.core.windows.net/giframeworkmaps/version-logos/Dorset council logo_white_d.svg">
     <NavLinks>
-        @* <AuthorizeView>
+        <AuthorizeView>
             <Authorized>
-                <GdsHeaderNavLink Href="account/myaccount" Match="NavLinkMatch.All">My account</GdsHeaderNavLink>
-                <GdsHeaderNavLink Href="signout" Match="NavLinkMatch.All">Sign out</GdsHeaderNavLink>
+                <GdsHeaderNavLink Href="account/my-account" Match="NavLinkMatch.All">My account</GdsHeaderNavLink>
+                <GdsHeaderNavLink Href="sign-out" Match="NavLinkMatch.All">Sign out</GdsHeaderNavLink>
             </Authorized>
             <NotAuthorized>
                 <GdsHeaderNavLink Href="@_signInUrl" Match="NavLinkMatch.All">Sign in</GdsHeaderNavLink>
             </NotAuthorized>
-        </AuthorizeView> *@
+        </AuthorizeView>
     </NavLinks>
 </GdsHeader>
 <GdsContainer AdditionalCssClasses="flex-fill">
@@ -58,14 +58,15 @@
     private NavigationManager Navigation { get; set; } = default!;
 
     private GdsPhaseBanner.Phases _phase => Env.IsProduction() ? GdsPhaseBanner.Phases.Alpha : GdsPhaseBanner.Phases.Development;
-    // private string _signInUrl
-    // {
-    //     get
-    //     {
-    //         var redirectUri = Navigation.SignInRedirectUri;
-    //         return string.IsNullOrWhiteSpace(redirectUri) ? "signin" : $"signin?redirectUri={redirectUri}";
-    //     }
-    // }
+
+    private string _signInUrl
+    {
+        get
+        {
+            var redirectUri = Navigation.SignInRedirectUri;
+            return string.IsNullOrWhiteSpace(redirectUri) ? "sign-in" : $"sign-in?redirectUri={redirectUri}";
+        }
+    }
 
     private string GetSkipLinkHref()
     {

@@ -1,0 +1,15 @@
+﻿@attribute [AllowAnonymous]
+@page "/account/signed-out"
+
+<PageTitle>Signed out</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <GdsHeading Level="1" Size="GdsSize.Large">Signed in</GdsHeading>
+        <p>You still seem to be signed in, try <a href="signout" class="govuk-link">signing out</a></p>
+    </Authorized>
+    <NotAuthorized>
+        <GdsHeading Level="1" Size="GdsSize.Large">Signed out</GdsHeading>
+        <p>You have been signed out</p>
+    </NotAuthorized>
+</AuthorizeView>
