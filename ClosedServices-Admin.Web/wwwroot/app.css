@@ -14,4 +14,12 @@ button.govuk-link {
   color: var(--govuk-frontend-color-blue);
   padding: 0;
   cursor: pointer;
+  box-shadow:none;
+}
+button.govuk-link.signout-link {
+  margin-bottom:0;
+  color:white;
+}
+button.govuk-link.signout-link:hover {
+  background:none;
 }

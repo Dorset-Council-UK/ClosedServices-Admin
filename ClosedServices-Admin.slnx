@@ -1,5 +1,7 @@
 <Solution>
+  <Project Path="ClosedServices-Admin-Shared/ClosedServices-Admin-Shared.csproj" Id="7bf227b1-4c5e-4255-9929-c715ccc170f3" />
   <Project Path="ClosedServices-Admin.AppHost/ClosedServices-Admin.AppHost.csproj" />
+  <Project Path="ClosedServices-Admin.Data/ClosedServices-Admin.Data.csproj" Id="74ed503f-8510-41ae-b03d-6e46f9f8a4cf" />
   <Project Path="ClosedServices-Admin.ServiceDefaults/ClosedServices-Admin.ServiceDefaults.csproj" />
   <Project Path="ClosedServices-Admin.Web/ClosedServices-Admin.Web.csproj" />
 </Solution>
