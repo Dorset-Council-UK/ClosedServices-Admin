@@ -1,4 +1,5 @@
-﻿@page "/not-found"
+﻿@attribute [AllowAnonymous]
+@page "/not-found"
 @layout MainLayout
 @inject NavigationManager navigationManager
 
@@ -11,4 +12,4 @@
 
 <p>If the web address is correct or you selected a link or button, contact the Closed Services Admin team for help</p>
 
-<GdsLink Href="/">Go to home page</GdsLink>
+<GdsLink Href="">Go to home page</GdsLink>
