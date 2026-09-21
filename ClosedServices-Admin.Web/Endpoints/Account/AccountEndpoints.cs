@@ -118,7 +118,9 @@ internal static class AccountEndpoints
         {
             oAuthChallengeProperties.Scope = scope.Split(" ");
         }
-        oAuthChallengeProperties.RedirectUri = redirectUri;
+        oAuthChallengeProperties.RedirectUri = redirectUri is not null && RedirectHttpResult.IsLocalUrl(redirectUri)
+            ? redirectUri
+            : null;
 
         return TypedResults.Challenge(oAuthChallengeProperties, [scheme]);
     }
