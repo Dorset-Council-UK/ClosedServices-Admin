@@ -19,13 +19,6 @@ internal static class WebApplicationBuilderExtension
     /// </summary>
     internal static WebApplicationBuilder AddClosedServicesNetworking(this WebApplicationBuilder builder)
     {
-        //add reslience handlers to http client
-        builder.Services.ConfigureHttpClientDefaults(http =>
-        {
-            // Turn on resilience by default
-            http.AddStandardResilienceHandler();
-        });
-
         //add optional forwarded headers middleware handler
         var section = builder.Configuration
             .GetSection(ClosedServicesOptions.SectionName)

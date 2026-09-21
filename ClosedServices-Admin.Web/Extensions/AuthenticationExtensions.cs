@@ -29,6 +29,8 @@ internal static class AuthenticationExtensions
 
             builder.Services.AddResilientHttpClients();
 
+            const string authRetryCookieName = "authretry-closedservices";
+
             builder.Services
             .AddOptions<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme)
             .Configure<IHttpClientFactory>((options, httpClientFactory) =>
@@ -52,7 +54,7 @@ internal static class AuthenticationExtensions
                     if (context.Failure?.Message?.Contains("AADSTS50133", StringComparison.Ordinal) == true ||
                         context.Failure?.Message?.Contains("AADSTS165000", StringComparison.Ordinal) == true)
                     {
-                        const string authRetryCookieName = "authretry";
+                        
                         var hasRetried = context.Request.Cookies.ContainsKey(authRetryCookieName);
 
                         if (!hasRetried)
@@ -85,12 +87,19 @@ internal static class AuthenticationExtensions
                             await existingOnRemoteFailureHandler(context);
                     }
                 };
+                options.Events.OnTokenValidated = async context =>
+                {
+                    context.Response.Cookies.Delete(authRetryCookieName);
+                    if (existingOnTokenValidatedHandler != null)
+                        await existingOnTokenValidatedHandler(context);
+                };
             });
 
             // Add Blazor cascading authentication state
             builder.Services.AddCascadingAuthenticationState();
 
             // Setup Authorization
+            builder.Services.AddAuthorization();
             //builder.Services
             //    .AddAuthorizationBuilder()
             //    .AddPolicy(PolicyNames.Reader, policy => policy

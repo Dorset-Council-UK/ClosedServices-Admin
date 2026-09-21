@@ -17,8 +17,6 @@ builder
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddCascadingAuthenticationState();
-
 var options = builder.Configuration.GetSection(ClosedServicesOptions.SectionName).Get<ClosedServicesOptions>();
 
 
@@ -42,7 +40,6 @@ if (options is not null && options.UseHttpsRedirection)
 }
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 

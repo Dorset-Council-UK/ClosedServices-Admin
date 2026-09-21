@@ -50,7 +50,8 @@ internal static class AccountEndpoints
 
         // Convert relative to absolute by prepending /
         var pathWithoutLeadingSlash = redirectUri.TrimStart('/');
-        var absolutePath = $"/{pathBase}/{pathWithoutLeadingSlash}";
+        var normalisedPathBase = pathBase.Trim('/');
+        var absolutePath = string.IsNullOrEmpty(normalisedPathBase) ? $"/{pathWithoutLeadingSlash}" : $"/{normalisedPathBase}/{pathWithoutLeadingSlash}";
         return RedirectHttpResult.IsLocalUrl(absolutePath) ? absolutePath : null;
     }
 
