@@ -9,10 +9,14 @@
         <AuthorizeView>
             <Authorized>
                 <GdsHeaderNavLink Href="account/my-account" Match="NavLinkMatch.All">My account</GdsHeaderNavLink>
-                <GdsHeaderNavLink Href="sign-out" Match="NavLinkMatch.All">Sign out</GdsHeaderNavLink>
+                <span data-enhance-nav="false">
+                    <GdsHeaderNavLink Href="sign-out" Match="NavLinkMatch.All">Sign out</GdsHeaderNavLink>
+                </span>
             </Authorized>
             <NotAuthorized>
-                <GdsHeaderNavLink Href="@_signInUrl" Match="NavLinkMatch.All">Sign in</GdsHeaderNavLink>
+                <span data-enhance-nav="false">
+                    <GdsHeaderNavLink Href="@_signInUrl" Match="NavLinkMatch.All">Sign in</GdsHeaderNavLink>
+                </span>
             </NotAuthorized>
         </AuthorizeView>
     </NavLinks>
