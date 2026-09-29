@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ClosedServices-Admin.MigrationService\ClosedServices-Admin.MigrationService.csproj" />
     <ProjectReference Include="..\ClosedServices-Admin.Web\ClosedServices-Admin.Web.csproj" />
   </ItemGroup>
 
