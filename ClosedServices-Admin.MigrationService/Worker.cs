@@ -57,14 +57,6 @@ public class Worker(
             Geom = new NetTopologySuite.Geometries.Point(366646, 101677),
         };
 
-
-        //SupportTicket firstTicket = new()
-        //{
-        //    Title = "Test Ticket",
-        //    Description = "Default ticket, please ignore!",
-        //    Completed = true
-        //};
-
         var strategy = dbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>
         {
@@ -72,8 +64,11 @@ public class Worker(
             await using var transaction = await dbContext.Database
                 .BeginTransactionAsync(cancellationToken);
 
-            await dbContext.Services.AddAsync(school, cancellationToken);
-            await dbContext.SaveChangesAsync(cancellationToken);
+            if (!await dbContext.Services.AnyAsync(x => x.Name == school.Name, cancellationToken))
+            {
+                await dbContext.Services.AddAsync(school, cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
             await transaction.CommitAsync(cancellationToken);
         });
     }
