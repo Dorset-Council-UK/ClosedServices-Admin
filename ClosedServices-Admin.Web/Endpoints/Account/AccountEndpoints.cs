@@ -48,10 +48,12 @@ internal static class AccountEndpoints
             return redirectUri;
         }
 
-        // Convert relative to absolute by prepending /
+        // Convert relative to absolute by prepending the PathBase.
+        // pathBase already follows the app-wide convention ("" for root, or "/segment"
+        // with no trailing slash) via ClosedServicesOptions.NormalisePathBase, so it can be
+        // used directly without further trimming.
         var pathWithoutLeadingSlash = redirectUri.TrimStart('/');
-        var normalisedPathBase = pathBase.Trim('/');
-        var absolutePath = string.IsNullOrEmpty(normalisedPathBase) ? $"/{pathWithoutLeadingSlash}" : $"/{normalisedPathBase}/{pathWithoutLeadingSlash}";
+        var absolutePath = $"{pathBase}/{pathWithoutLeadingSlash}";
         return RedirectHttpResult.IsLocalUrl(absolutePath) ? absolutePath : null;
     }
 
@@ -65,7 +67,7 @@ internal static class AccountEndpoints
 
         var properties = new AuthenticationProperties
         {
-            RedirectUri = normalisedRedirectUri ?? $"/{options.Value.PathBase}",
+            RedirectUri = normalisedRedirectUri ?? (string.IsNullOrEmpty(options.Value.PathBase) ? "/" : options.Value.PathBase),
             Parameters =
             {
                 { Constants.LoginHint, loginHint },
@@ -78,10 +80,7 @@ internal static class AccountEndpoints
 
     internal static Results<SignOutHttpResult, UnauthorizedHttpResult> SignOut(IOptions<ClosedServicesOptions> options)
     {
-        var pathBase = options.Value.PathBase?.Trim('/');
-        var signedOutRedirectUri = string.IsNullOrEmpty(pathBase)
-            ? "/account/signed-out"
-            : $"/{pathBase}/account/signed-out";
+        var signedOutRedirectUri = $"{options.Value.PathBase}/account/signed-out";
 
         var properties = new AuthenticationProperties
         {
