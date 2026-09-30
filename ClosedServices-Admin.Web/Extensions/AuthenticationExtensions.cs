@@ -1,6 +1,7 @@
 ﻿
 using ClosedServices_Admin.Endpoints.Account;
 using ClosedServices_Admin_Shared.Options;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
@@ -21,11 +22,32 @@ internal static class AuthenticationExtensions
                 .GetSection(ClosedServicesOptions.SectionName)
                 .GetSection(AzureAdOptions.SectionName);
 
+            // The cookie's Path must match the app's normalised PathBase convention (see
+            // ClosedServicesOptions.NormalisePathBase), otherwise UsePathBase and the cookie's
+            // default Path can disagree, resulting in duplicate .AspNetCore.Cookies entries with
+            // different Path values. The stale cookie (wrong path) never gets cleared on
+            // sign-out, so the app still thinks the user is authenticated even though Entra has
+            // signed them out.
+            var rawPathBase = builder.Configuration
+                .GetSection(ClosedServicesOptions.SectionName)
+                .GetValue<string>(nameof(ClosedServicesOptions.PathBase));
+            var cookiePath = ClosedServicesOptions.NormalisePathBase(rawPathBase) is { Length: > 0 } normalised
+                ? normalised
+                : "/";
 
             // Setup Authentication
             builder.Services
                 .AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(azureAdSection);
+
+            builder.Services
+                .AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
+                .Configure(options =>
+                {
+                    // Pin the cookie's Path explicitly so the browser only ever stores a single
+                    // .AspNetCore.Cookies entry for this app, and sign-out reliably clears it.
+                    options.Cookie.Path = cookiePath;
+                });
 
             builder.Services.AddResilientHttpClients();
 

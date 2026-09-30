@@ -68,6 +68,15 @@ internal static class WebApplicationBuilderExtension
             .Configure<NetworkingOptions>(sectionNetworking)
             .Configure<DatabaseOptions>(sectionDatabase);
 
+        // Normalise PathBase once, centrally, so every consumer (UsePathBase, cookie paths,
+        // redirect URIs, the <base href> tag, etc.) sees the same convention: "" for root,
+        // or "/segment" (leading slash, no trailing slash) for a sub-path. This removes the
+        // need for ad-hoc Trim('/') calls scattered throughout the codebase.
+        builder.Services.PostConfigure<ClosedServicesOptions>(options =>
+        {
+            options.PathBase = ClosedServicesOptions.NormalisePathBase(options.PathBase);
+        });
+
         return builder;
     }
 

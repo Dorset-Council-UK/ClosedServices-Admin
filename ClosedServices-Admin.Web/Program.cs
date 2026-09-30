@@ -1,5 +1,6 @@
 using ClosedServices_Admin.Components;
 using ClosedServices_Admin_Shared.Options;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,12 +18,13 @@ builder
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-var options = builder.Configuration.GetSection(ClosedServicesOptions.SectionName).Get<ClosedServicesOptions>();
-
-
 var app = builder.Build();
 
-app.UsePathBase($"/{options?.PathBase}");
+// Resolve via DI (not builder.Configuration.Get<>) so the PostConfigure normalisation
+// registered in AddClosedServicesOptions has been applied to PathBase.
+var options = app.Services.GetRequiredService<IOptions<ClosedServicesOptions>>().Value;
+
+app.UsePathBase(options.PathBase);
 
 app.UseForwardedHeaders();
 
@@ -34,7 +36,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
 }
 
-if (options is not null && options.UseHttpsRedirection)
+if (options.UseHttpsRedirection)
 {
     app.UseHttpsRedirection();
 }
