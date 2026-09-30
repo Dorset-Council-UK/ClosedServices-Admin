@@ -9,7 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ClosedServices-Admin.MigrationService\ClosedServices-Admin.MigrationService.csproj" />
     <ProjectReference Include="..\ClosedServices-Admin.Web\ClosedServices-Admin.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.5.4" />
   </ItemGroup>
 
 </Project>

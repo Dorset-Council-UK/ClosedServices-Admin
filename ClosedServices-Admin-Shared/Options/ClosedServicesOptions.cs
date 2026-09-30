@@ -3,7 +3,7 @@
 public record ClosedServicesOptions
 {
     public const string SectionName = "ClosedServices";
-    public const string ConnectionStringName = "ClosedServices";
+    public const string ConnectionStringName = "closedservices-admin";
 
     public required ApplicationInsightsOptions ApplicationInsights { get; init; }
     public required AzureAdOptions AzureAd { get; init; }

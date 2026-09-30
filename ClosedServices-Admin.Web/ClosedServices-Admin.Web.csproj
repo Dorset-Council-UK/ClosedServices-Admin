@@ -14,15 +14,20 @@
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.5.2" />
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.6.0" />
-    <PackageReference Include="Dorset-Council-UK.GdsBlazorComponents" Version="4.1.0" />
+    <PackageReference Include="Dorset-Council-UK.GdsBlazorComponents" Version="4.2.0" />
     <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
-    <PackageReference Include="Meziantou.Analyzer" Version="3.0.260">
+    <PackageReference Include="Meziantou.Analyzer" Version="3.0.290">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Identity.Web" Version="4.14.2" />
-    <PackageReference Include="Microsoft.Identity.Web.UI" Version="4.14.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Identity.Web" Version="4.15.0" />
+    <PackageReference Include="Microsoft.Identity.Web.UI" Version="4.15.0" />
+    <PackageReference Include="NetTopologySuite" Version="2.6.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="10.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="10.0.3" />

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-ClosedServices_Admin.MigrationService-47358441-0aa7-4107-934f-773e8de4e44f</UserSecretsId>
+    <RootNamespace>ClosedServices_Admin.MigrationService</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="10.0.3" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClosedServices-Admin.Data\ClosedServices-Admin.Data.csproj" />
+    <ProjectReference Include="..\ClosedServices-Admin.ServiceDefaults\ClosedServices-Admin.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>
