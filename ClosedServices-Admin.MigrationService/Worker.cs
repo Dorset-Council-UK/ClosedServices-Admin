@@ -1,3 +1,4 @@
+using Bogus;
 using ClosedServices_Admin.Data;
 using ClosedServices_Admin.Data.Models;
 using Microsoft.EntityFrameworkCore;
@@ -57,6 +58,18 @@ public class Worker(
             Geom = new NetTopologySuite.Geometries.Point(366646, 101677),
         };
 
+        var fakeSchool = new Faker<Service>()
+            .RuleFor(x => x.Name, f => f.Company.CompanyName())
+            .RuleFor(x => x.ServiceType, f => Data.Enums.ServiceType.School)
+            .RuleFor(x => x.ShortDescription, f => f.Lorem.Sentence())
+            .RuleFor(x => x.Geom, f => new NetTopologySuite.Geometries.Point(f.Random.Double(330000, 423000), f.Random.Double(67000, 423000)));
+
+        var fakeLibrary = new Faker<Service>()
+            .RuleFor(x => x.Name, f => f.Company.CompanyName())
+            .RuleFor(x => x.ServiceType, f => Data.Enums.ServiceType.Library)
+            .RuleFor(x => x.ShortDescription, f => f.Lorem.Sentence())
+            .RuleFor(x => x.Geom, f => new NetTopologySuite.Geometries.Point(f.Random.Double(330000, 423000), f.Random.Double(67000, 423000)));
+
         var strategy = dbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>
         {
@@ -66,7 +79,8 @@ public class Worker(
 
             if (!await dbContext.Services.AnyAsync(x => x.Name == school.Name, cancellationToken))
             {
-                await dbContext.Services.AddAsync(school, cancellationToken);
+                await dbContext.Services.AddRangeAsync(fakeSchool.GenerateBetween(100,200), cancellationToken);
+                await dbContext.Services.AddRangeAsync(fakeLibrary.GenerateBetween(10, max: 20), cancellationToken);
                 await dbContext.SaveChangesAsync(cancellationToken);
             }
             await transaction.CommitAsync(cancellationToken);
