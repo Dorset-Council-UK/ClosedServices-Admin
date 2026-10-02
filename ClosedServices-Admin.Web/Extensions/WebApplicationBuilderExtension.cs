@@ -1,6 +1,7 @@
 ﻿using Azure.Identity;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using ClosedServices_Admin.Data;
+using ClosedServices_Admin.Data.Enums;
 using ClosedServices_Admin_Shared.Options;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -153,6 +154,7 @@ internal static class WebApplicationBuilderExtension
             options.UseNpgsql(connectionString, x =>
             {
                 x.MigrationsHistoryTable("__EFMigrationsHistory", databaseOptions?.Schema);
+                x.MapEnum<ServiceType>("service_type", databaseOptions?.Schema);
                 x.UseNodaTime();
                 x.UseNetTopologySuite();
                 x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);

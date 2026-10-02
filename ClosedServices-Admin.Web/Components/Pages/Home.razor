@@ -19,7 +19,9 @@
             <ul>
                 @foreach (var service in Services.GroupBy(s => s.ServiceType))
                 {
-                    <li>@service.Key.ToString()</li>
+                    string link = $"services/{service.Key}";
+            
+                    <li><GdsLink Href="@link">@service.Key</GdsLink></li>
                 }
             </ul>
         }

@@ -11,6 +11,8 @@ namespace ClosedServices_Admin.Data.EntitiesConfiguration
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.ExternalUserId).IsRequired().HasMaxLength(200);
+            builder.Property(x => x.ServiceType)
+                .HasColumnType("service_type");
 
             builder.HasOne(x => x.Service)
                 .WithMany(x => x.Permissions)

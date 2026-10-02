@@ -1,0 +1,27 @@
+﻿@page "/services/{ServiceTypeRoute}"
+@using ClosedServices_Admin.Data.Enums
+
+<PageTitle>Services - Closed Services Admin</PageTitle>
+
+<GdsBackLink Href="" />
+
+<GdsHeading Level="1">Services</GdsHeading>
+
+<p>The list below shows all @ServiceTypeDisplayName you have permission to update.</p>
+
+@if (Services.Count == 0)
+{
+    <p>You do not have permission to update any @ServiceTypeDisplayName.</p>
+}
+else
+{
+    <p>You have permission to update the following services.</p>
+    <ul>
+        @foreach (var service in Services)
+        {
+            string link = $"service/{ParsedServiceType}/{service.Id}";
+
+            <li><GdsLink Href="@link">@service.Name</GdsLink></li>
+        }
+    </ul>
+}

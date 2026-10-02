@@ -9,5 +9,6 @@ namespace ClosedServices_Admin.Data.Services
         Task<Service?> GetService(Guid serviceId, CancellationToken ct = default);
         Task<IReadOnlyCollection<Service>> GetServicesByType(ServiceType serviceType, CancellationToken ct = default);
         Task<IReadOnlyCollection<Service>> GetServicesForUser(string userId, CancellationToken ct = default);
+        Task<IReadOnlyCollection<Service>> GetServicesForUserByType(string userId, ServiceType serviceType, CancellationToken ct = default);
     }
 }

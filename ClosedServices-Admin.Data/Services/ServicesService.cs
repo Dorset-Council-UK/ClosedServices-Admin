@@ -69,5 +69,12 @@ namespace ClosedServices_Admin.Data.Services
                 .ToListAsync(ct)
                 .ConfigureAwait(false);
         }
+
+        public async Task<IReadOnlyCollection<Service>> GetServicesForUserByType(string userId, ServiceType serviceType, CancellationToken ct = default)
+        {
+            var allServices = await GetServicesForUser(userId);
+            return [.. allServices.Where(service => service.ServiceType == serviceType)];
+        }
+
     }
 }
