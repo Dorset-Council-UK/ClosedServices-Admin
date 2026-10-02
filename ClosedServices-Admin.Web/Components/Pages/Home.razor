@@ -9,8 +9,20 @@
 
 <AuthorizeView>
     <Authorized>
-        <p>You have permission to update the following services.</p>
-        <p>[List of services goes here]</p>
+        @if (Services.Count == 0)
+        {
+            <p>You do not have permission to update any services.</p>
+        }
+        else
+        {
+            <p>You have permission to update the following services.</p>
+            <ul>
+                @foreach (var service in Services.GroupBy(s => s.ServiceType))
+                {
+                    <li>@service.Key.ToString()</li>
+                }
+            </ul>
+        }
     </Authorized>
     <NotAuthorized>
         <p><GdsLink Href="/sign-in">Sign in</GdsLink> to update your service</p>
