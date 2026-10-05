@@ -7,15 +7,20 @@ using System.Security.Claims;
 namespace ClosedServices_Admin.Components.Pages
 {
     public partial class Home(IServicesService servicesService,
-        ILogger<Home> logger)
+        ILogger<Home> logger,
+        NavigationManager navigationManager)
     {
         [CascadingParameter]
         private Task<AuthenticationState>? AuthenticationState { get; set; }
 
         private IReadOnlyCollection<Service> Services { get; set; } = Array.Empty<Service>();
+        private bool isLoading = false;
         protected override async Task OnInitializedAsync()
         {
-            if (AuthenticationState is null)
+            isLoading = true;
+            try
+            {
+                if (AuthenticationState is null)
             {
                 logger.LogWarning("Attempt to access home page without authentication");
                 return;
@@ -29,7 +34,16 @@ namespace ClosedServices_Admin.Components.Pages
             }
 
             Services = await servicesService.GetServicesForUser(authState.User.UserId);
-
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error loading services for user");
+                navigationManager.NavigateTo("/error");
+            }
+            finally
+            {
+                isLoading = false;
+            }
         }
     }
 }

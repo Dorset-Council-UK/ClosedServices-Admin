@@ -23,34 +23,49 @@ namespace ClosedServices_Admin.Components.Pages.Services
 
         private IReadOnlyCollection<Service> Services { get; set; } = Array.Empty<Service>();
 
+        private bool isLoading = false;
+
         protected override async Task OnParametersSetAsync()
         {
-            if (string.IsNullOrWhiteSpace(ServiceTypeRoute)
-                || int.TryParse(ServiceTypeRoute, out _)
-                || !Enum.TryParse<ServiceType>(ServiceTypeRoute, ignoreCase: true, out var parsedServiceType)
-                || !Enum.IsDefined(parsedServiceType))
+            isLoading = true;
+            try
             {
-                navigationManager.NavigateTo("/not-found");
-                return;
-            }
 
-            ParsedServiceType = parsedServiceType;
 
-            if (AuthenticationState is null)
+                if (string.IsNullOrWhiteSpace(ServiceTypeRoute)
+                    || int.TryParse(ServiceTypeRoute, out _)
+                    || !Enum.TryParse<ServiceType>(ServiceTypeRoute, ignoreCase: true, out var parsedServiceType)
+                    || !Enum.IsDefined(parsedServiceType))
+                {
+                    navigationManager.NavigateTo("/not-found");
+                    return;
+                }
+
+                ParsedServiceType = parsedServiceType;
+
+                if (AuthenticationState is null)
+                {
+                    logger.LogWarning("Attempt to access home page without authentication");
+                    return;
+                }
+
+                var authState = await AuthenticationState;
+                if (!authState.User.IsAuthenticated)
+                {
+                    logger.LogWarning("Attempt to access home page without authentication");
+                    return;
+                }
+
+                Services = await servicesService.GetServicesForUserByType(authState.User.UserId, parsedServiceType);
+            }catch(Exception ex)
             {
-                logger.LogWarning("Attempt to access home page without authentication");
-                return;
+                logger.LogError(ex, "Error loading services for user");
+                navigationManager.NavigateTo("/error");
             }
-
-            var authState = await AuthenticationState;
-            if (!authState.User.IsAuthenticated)
+            finally
             {
-                logger.LogWarning("Attempt to access home page without authentication");
-                return;
+                isLoading = false;
             }
-
-            Services = await servicesService.GetServicesForUserByType(authState.User.UserId, parsedServiceType);
-
         }
     }
 }

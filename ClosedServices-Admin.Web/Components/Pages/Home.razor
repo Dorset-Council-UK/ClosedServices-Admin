@@ -9,21 +9,28 @@
 
 <AuthorizeView>
     <Authorized>
-        @if (Services.Count == 0)
+        @if (isLoading)
         {
-            <p>You do not have permission to update any services.</p>
+            <GdsSpinner Show Message="Loading services..." ShowMessage></GdsSpinner>
         }
         else
         {
-            <p>You have permission to update the following services.</p>
-            <ul>
-                @foreach (var service in Services.GroupBy(s => s.ServiceType))
-                {
-                    string link = $"services/{service.Key}";
-            
-                    <li><GdsLink Href="@link">@service.Key</GdsLink></li>
-                }
-            </ul>
+            @if (Services.Count == 0)
+            {
+                <p>You do not have permission to update any services.</p>
+            }
+            else
+            {
+                <p>You have permission to update the following services.</p>
+                <ul>
+                    @foreach (var service in Services.GroupBy(s => s.ServiceType))
+                    {
+                        string link = $"services/{service.Key}";
+
+                        <li><GdsLink Href="@link">@service.Key</GdsLink></li>
+                    }
+                </ul>
+            }
         }
     </Authorized>
     <NotAuthorized>
