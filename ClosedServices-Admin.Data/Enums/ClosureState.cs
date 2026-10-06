@@ -2,7 +2,7 @@
 {
     public enum ClosureState
     {
-        Open = 1,
+        NoDisruption = 1,
         Closed = 2,
         PartiallyClosed = 3,
     }

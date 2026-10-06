@@ -1,0 +1,63 @@
+@page "/services/{ServiceTypeRoute}/update/{ServiceId:guid}"
+
+@if (isLoading)
+{
+    <GdsSpinner Show Message="Loading service..." ShowMessage />
+}
+else if (Service is not null)
+{
+    <PageTitle>Update @Service.Name - Closed Services Admin</PageTitle>
+    <GdsBackLink Href="@BackLink" />
+    <GdsHeading Level="1">Update @Service.Name</GdsHeading>
+
+    @if (CurrentStatus is not null)
+    {
+        <GdsInsetText>
+            <strong>Current status: @CurrentStatus.ClosureState</strong><br />
+            @(CurrentStatus.IsOverride ? "This status is set by an active update." : "This status is based on the operating hours.")
+        </GdsInsetText>
+    }
+
+    @if (ValidationError is not null)
+    {
+        <GdsErrorMessage>@ValidationError</GdsErrorMessage>
+    }
+
+    <EditForm Model="this" OnValidSubmit="SaveAsync">
+        <GdsFormGroup>
+            <GdsFieldsetGroup>
+                <GdsFieldsetLegend><GdsFieldsetHeading Level="2">Set a new status</GdsFieldsetHeading></GdsFieldsetLegend>
+                <GdsRadios @bind-Value="SelectedClosureState">
+                    <GdsRadioItem><GdsInputRadio Value="@ClosureState.NoDisruption" /><GdsRadioLabel Text="No disruption" /></GdsRadioItem>
+                    <GdsRadioItem><GdsInputRadio Value="@ClosureState.Closed" /><GdsRadioLabel Text="Closed" /></GdsRadioItem>
+                    <GdsRadioItem><GdsInputRadio Value="@ClosureState.PartiallyClosed" /><GdsRadioLabel Text="Partially closed" /></GdsRadioItem>
+                </GdsRadios>
+            </GdsFieldsetGroup>
+        </GdsFormGroup>
+
+        <GdsFormGroup>
+            <GdsFieldsetGroup>
+                <GdsFieldsetLegend><GdsFieldsetHeading Level="2">When should this status apply?</GdsFieldsetHeading></GdsFieldsetLegend>
+                <GdsRadios @bind-Value="SelectedDuration">
+                    <GdsRadioItem><GdsInputRadio Value="@("today")" /><GdsRadioLabel Text="Just today" /></GdsRadioItem>
+                    <GdsRadioItem><GdsInputRadio Value="@("tomorrow")" /><GdsRadioLabel Text="Today and tomorrow" /></GdsRadioItem>
+                    <GdsRadioItem><GdsInputRadio Value="@("week")" /><GdsRadioLabel Text="All this week" /></GdsRadioItem>
+                    <GdsRadioItem><GdsInputRadio Value="@("custom")" /><GdsRadioLabel Text="Custom" /></GdsRadioItem>
+                </GdsRadios>
+            </GdsFieldsetGroup>
+        </GdsFormGroup>
+
+        @if (SelectedDuration == "custom")
+        {
+            <GdsFormGroup><GdsLabel Text="Start date" /><InputDate @bind-Value="StartDate" class="govuk-input" /><GdsHint>Start time is optional.</GdsHint><input type="time" @bind="StartTime" class="govuk-input" /></GdsFormGroup>
+            <GdsFormGroup><GdsLabel Text="End date" /><InputDate @bind-Value="EndDate" class="govuk-input" /><GdsHint>End date and time are optional.</GdsHint><input type="time" @bind="EndTime" class="govuk-input" /></GdsFormGroup>
+        }
+
+        <GdsFormGroup>
+            <GdsLabel Text="Message (optional)" />
+            <GdsHint>Provide any additional information about what is closed and why.</GdsHint>
+            <InputTextArea rows="3" class="govuk-textarea" @bind-Value="Message" />
+        </GdsFormGroup>
+        <button class="govuk-button" type="submit" disabled="@isSaving">Save status</button>
+    </EditForm>
+}

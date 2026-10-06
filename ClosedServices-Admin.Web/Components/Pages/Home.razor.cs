@@ -38,7 +38,7 @@ namespace ClosedServices_Admin.Components.Pages
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error loading services for user");
-                navigationManager.NavigateTo("/error");
+                navigationManager.NavigateTo("error");
             }
             finally
             {

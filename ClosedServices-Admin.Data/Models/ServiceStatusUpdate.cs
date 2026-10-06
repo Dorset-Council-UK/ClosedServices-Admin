@@ -1,4 +1,5 @@
 ﻿using ClosedServices_Admin.Data.Enums;
+using NodaTime;
 using System.ComponentModel.DataAnnotations;
 
 namespace ClosedServices_Admin.Data.Models
@@ -16,13 +17,13 @@ namespace ClosedServices_Admin.Data.Models
         [MaxLength(2000)]
         public string Message { get; set; } = string.Empty;
 
-        public DateTimeOffset EffectiveFrom { get; set; }
+        public Instant EffectiveFrom { get; set; }
 
-        public DateTimeOffset? EffectiveTo { get; set; }
+        public Instant? EffectiveTo { get; set; }
 
         [MaxLength(200)]
         public string UpdatedByExternalUserId { get; set; } = string.Empty;
 
-        public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+        public Instant UpdatedAt { get; set; } = SystemClock.Instance.GetCurrentInstant();
     }
 }

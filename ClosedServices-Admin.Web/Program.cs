@@ -18,6 +18,7 @@ builder
 // Add services to the container.
 
 builder.Services.AddScoped<IServicesService, ServicesService>();
+builder.Services.AddScoped<IServiceStatusService, ServiceStatusService>();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

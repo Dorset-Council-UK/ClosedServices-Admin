@@ -1,5 +1,4 @@
 ﻿@page "/services/{ServiceTypeRoute}"
-@using ClosedServices_Admin.Data.Enums
 
 <PageTitle>Services - Closed Services Admin</PageTitle>
 
@@ -25,7 +24,7 @@ else
         <ul>
             @foreach (var service in Services)
             {
-                string link = $"service/{ParsedServiceType}/{service.Id}";
+                string link = $"services/{ParsedServiceType}/update/{service.Id}";
 
                 <li><GdsLink Href="@link">@service.Name</GdsLink></li>
             }

@@ -38,6 +38,12 @@ namespace ClosedServices_Admin.Data.Services
                 .ConfigureAwait(false);
         }
 
+        public async Task<Service?> GetServiceForUser(string userId, Guid serviceId, CancellationToken ct = default)
+        {
+            var services = await GetServicesForUser(userId, ct).ConfigureAwait(false);
+            return services.FirstOrDefault(service => service.Id == serviceId);
+        }
+
         public async Task<IReadOnlyCollection<Service>> GetServicesForUser(string userId, CancellationToken ct = default)
         {
             await using var context = await contextFactory.CreateDbContextAsync(ct);

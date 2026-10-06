@@ -37,7 +37,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
                     || !Enum.TryParse<ServiceType>(ServiceTypeRoute, ignoreCase: true, out var parsedServiceType)
                     || !Enum.IsDefined(parsedServiceType))
                 {
-                    navigationManager.NavigateTo("/not-found");
+                    navigationManager.NavigateTo("not-found");
                     return;
                 }
 
@@ -60,7 +60,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
             }catch(Exception ex)
             {
                 logger.LogError(ex, "Error loading services for user");
-                navigationManager.NavigateTo("/error");
+                navigationManager.NavigateTo("error");
             }
             finally
             {

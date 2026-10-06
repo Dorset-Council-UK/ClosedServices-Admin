@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
+using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -131,11 +132,11 @@ namespace ClosedServices_Admin.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("closure_state");
 
-                    b.Property<DateTimeOffset>("EffectiveFrom")
+                    b.Property<Instant>("EffectiveFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("effective_from");
 
-                    b.Property<DateTimeOffset?>("EffectiveTo")
+                    b.Property<Instant?>("EffectiveTo")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("effective_to");
 
@@ -149,7 +150,7 @@ namespace ClosedServices_Admin.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("service_id");
 
-                    b.Property<DateTimeOffset>("UpdatedAt")
+                    b.Property<Instant>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
