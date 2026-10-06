@@ -6,8 +6,6 @@
 
 <GdsHeading Level="1">Services</GdsHeading>
 
-<p>The list below shows all @ServiceTypeDisplayName you have permission to update.</p>
-
 @if(isLoading)
 {
     <GdsSpinner Show Message="Loading services..." ShowMessage></GdsSpinner>
@@ -20,7 +18,7 @@ else
     }
     else
     {
-        <p>You have permission to update the following services.</p>
+        <p>The list below shows all @ServiceTypeDisplayName.ToLowerInvariant() you have permission to update.</p>
         <ul>
             @foreach (var service in Services)
             {

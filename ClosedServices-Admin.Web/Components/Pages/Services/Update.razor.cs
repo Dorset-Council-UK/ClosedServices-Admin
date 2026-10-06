@@ -1,8 +1,10 @@
 using ClosedServices_Admin.Data.Enums;
 using ClosedServices_Admin.Data.Models;
 using ClosedServices_Admin.Data.Services;
+using Humanizer;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.WebUtilities;
 using NodaTime;
 using System.Security.Claims;
 
@@ -10,6 +12,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
 {
     public partial class Update(IServicesService servicesService,
         IServiceStatusService serviceStatusService,
+        IServiceOperatingHoursService operatingHoursService,
         ILogger<Home> logger,
         NavigationManager navigationManager)
     {
@@ -31,15 +34,33 @@ namespace ClosedServices_Admin.Components.Pages.Services
         private string BackLink => $"services/{ServiceTypeRoute}";
         private bool isLoading = false;
         private ServiceCurrentStatus? CurrentStatus { get; set; }
-        private ClosureState SelectedClosureState { get; set; } = ClosureState.NoDisruption;
-        private string SelectedDuration { get; set; } = "today";
+        private ServiceOperatingHoursEvaluation? OperatingHoursEvaluation { get; set; }
+        private ClosureState SelectedClosureState { get; set; } = ClosureState.Closed;
+        private string SelectedDuration { get; set; } = "custom";
         private DateOnly? StartDate { get; set; }
         private TimeOnly? StartTime { get; set; }
         private DateOnly? EndDate { get; set; }
         private TimeOnly? EndTime { get; set; }
         private string? Message { get; set; }
         private string? ValidationError { get; set; }
+        private string CurrentStatusDayLabel { get; set; } = "Today";
+        private string NextOperatingDayLabel { get; set; } = "Tomorrow";
+        private bool ShowTodayOption { get; set; }
+        private bool ShowTodayAndNextOption { get; set; }
+        private bool ShowTomorrowOption { get; set; }
+        private ServiceStatusUpdateSummary? RemovableClosure { get; set; }
+        private bool ShowRemovalSuccessMessage { get; set; }
         private bool isSaving;
+
+        private string RemovalConfirmationLink => RemovableClosure is null
+            ? string.Empty
+            : $"services/{ServiceTypeRoute}/update/{ServiceId}/remove-closure/{RemovableClosure.Id}";
+
+        private string ClosureStatusText => RemovableClosure is null
+            ? string.Empty
+            : RemovableClosure.IsCurrent
+                ? $"This {ServiceTypeDisplayName.Singularize().ToLowerInvariant()} is currently {FormatClosureState(RemovableClosure.ClosureState)}"
+                : $"This {ServiceTypeDisplayName.Singularize().ToLowerInvariant()} has an upcoming closure on {FormatClosureDate(RemovableClosure.EffectiveFrom)}";
 
         protected override async Task OnParametersSetAsync()
         {
@@ -77,7 +98,18 @@ namespace ClosedServices_Admin.Components.Pages.Services
                     return;
                 }
 
-                CurrentStatus = await serviceStatusService.GetCurrentStatus(ServiceId, SystemClock.Instance.GetCurrentInstant());
+                var now = SystemClock.Instance.GetCurrentInstant();
+                ShowRemovalSuccessMessage = IsRemovalSuccessMessageRequested();
+                OperatingHoursEvaluation = operatingHoursService.Evaluate(Service, now);
+
+                ConfigureDurationOptions(now);
+
+                var statusInstant = OperatingHoursEvaluation.IsWithinTodayOperatingHours
+                    ? now
+                    : OperatingHoursEvaluation.NextOperatingPeriod?.OpenInstant ?? now;
+
+                CurrentStatus = await serviceStatusService.GetCurrentStatus(ServiceId, statusInstant);
+                RemovableClosure = await serviceStatusService.GetCurrentOrNextStatusUpdate(ServiceId, now);
             }
             catch (Exception ex)
             {
@@ -122,13 +154,24 @@ namespace ClosedServices_Admin.Components.Pages.Services
         {
             if (SelectedDuration != "custom")
             {
-                var endDate = SelectedDuration switch
+                if (OperatingHoursEvaluation is null)
                 {
-                    "tomorrow" => DateOnly.FromDateTime(now.ToDateTimeUtc()).AddDays(1),
-                    "week" => DateOnly.FromDateTime(now.ToDateTimeUtc()).AddDays(7 - (int)now.ToDateTimeUtc().DayOfWeek),
-                    _ => DateOnly.FromDateTime(now.ToDateTimeUtc())
+                    ValidationError = "Unable to determine service operating hours.";
+                    return null;
+                }
+
+                return SelectedDuration switch
+                {
+                    "today" when ShowTodayOption && OperatingHoursEvaluation.TodayPeriod is not null
+                        => (now, OperatingHoursEvaluation.TodayPeriod.CloseInstant),
+                    "today-and-next"
+                        when ShowTodayAndNextOption && OperatingHoursEvaluation.NextOperatingPeriodAfterToday is not null
+                        => (now, OperatingHoursEvaluation.NextOperatingPeriodAfterToday.CloseInstant),
+                    "tomorrow"
+                        when ShowTomorrowOption && OperatingHoursEvaluation.NextOperatingPeriodAfterToday is not null
+                        => (OperatingHoursEvaluation.NextOperatingPeriodAfterToday.OpenInstant, OperatingHoursEvaluation.NextOperatingPeriodAfterToday.CloseInstant),
+                    _ => InvalidPresetSelection()
                 };
-                return (now, AtEndOfDay(endDate, now));
             }
 
             if (StartDate is null)
@@ -137,8 +180,8 @@ namespace ClosedServices_Admin.Components.Pages.Services
                 return null;
             }
 
-            var start = AtTime(StartDate.Value, StartTime ?? TimeOnly.MinValue, now);
-            Instant? end = EndDate is null ? null : AtTime(EndDate.Value, EndTime ?? TimeOnly.MaxValue, now);
+            var start = AtTime(StartDate.Value, StartTime ?? TimeOnly.MinValue);
+            Instant? end = EndDate is null ? null : AtTime(EndDate.Value, EndTime ?? TimeOnly.MaxValue);
             if (end is not null && end <= start)
             {
                 ValidationError = "The end date and time must be after the start date and time.";
@@ -148,11 +191,84 @@ namespace ClosedServices_Admin.Components.Pages.Services
             return (start, end);
         }
 
-        private static Instant AtEndOfDay(DateOnly date, Instant now) => AtTime(date, TimeOnly.MaxValue, now);
-        private static Instant AtTime(DateOnly date, TimeOnly time, Instant now)
+        private void ConfigureDurationOptions(Instant now)
         {
-            var dateTime = DateTime.SpecifyKind(date.ToDateTime(time), DateTimeKind.Utc);
-            return Instant.FromDateTimeUtc(dateTime);
+            if (OperatingHoursEvaluation is null)
+            {
+                SelectedDuration = "custom";
+                return;
+            }
+
+            var localNowDate = OperatingHoursEvaluation.LocalNow.Date;
+
+            ShowTodayOption = OperatingHoursEvaluation.IsTodayOperationalBeforeClose;
+            ShowTodayAndNextOption = ShowTodayOption && OperatingHoursEvaluation.NextOperatingPeriodAfterToday is not null;
+            ShowTomorrowOption = OperatingHoursEvaluation.NextOperatingPeriodAfterToday is not null;
+
+            if (OperatingHoursEvaluation.IsWithinTodayOperatingHours)
+            {
+                CurrentStatusDayLabel = "Today";
+            }
+            else
+            {
+                var statusTargetDate = OperatingHoursEvaluation.NextOperatingPeriod?.Date ?? localNowDate;
+                CurrentStatusDayLabel = operatingHoursService.FormatOperatingDayLabel(statusTargetDate, localNowDate);
+            }
+
+            if (OperatingHoursEvaluation.NextOperatingPeriodAfterToday is not null)
+            {
+                NextOperatingDayLabel = operatingHoursService.FormatOperatingDayLabel(
+                    OperatingHoursEvaluation.NextOperatingPeriodAfterToday.Date,
+                    localNowDate);
+            }
+
+            SelectedDuration = ShowTodayOption
+                ? "today"
+                : ShowTomorrowOption
+                    ? "tomorrow"
+                    : "custom";
+        }
+
+        private (Instant Start, Instant? End)? InvalidPresetSelection()
+        {
+            ValidationError = "Select a valid preset duration for this service's operating hours.";
+            return null;
+        }
+
+        private static Instant AtTime(DateOnly date, TimeOnly time)
+        {
+            var zone = DateTimeZoneProviders.Tzdb["Europe/London"];
+            var localDateTime = LocalDateTime.FromDateTime(date.ToDateTime(time));
+            return localDateTime.InZoneLeniently(zone).ToInstant();
+        }
+
+        private static string FormatClosureState(ClosureState closureState)
+        {
+            return closureState switch
+            {
+                ClosureState.PartiallyClosed => "partially closed",
+                ClosureState.Closed => "closed",
+                _ => closureState.ToString()
+            };
+        }
+
+        private static string FormatClosureDate(Instant instant)
+        {
+            var zone = DateTimeZoneProviders.Tzdb["Europe/London"];
+            var closureDate = instant.InZone(zone).Date;
+            var localDateTime = closureDate.AtMidnight();
+            return localDateTime.ToString("dddd d MMMM yyyy", null);
+        }
+
+        private bool IsRemovalSuccessMessageRequested()
+        {
+            var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
+            if (!QueryHelpers.ParseQuery(uri.Query).TryGetValue("removed", out var removed))
+            {
+                return false;
+            }
+
+            return string.Equals(removed.ToString(), "true", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

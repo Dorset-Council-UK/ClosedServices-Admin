@@ -53,7 +53,7 @@ namespace ClosedServices_Admin.Data.Services
                 Id = Guid.NewGuid(),
                 ServiceId = command.ServiceId,
                 ClosureState = command.ClosureState,
-                Message = string.IsNullOrWhiteSpace(command.Message) ? "No additional information provided." : command.Message.Trim(),
+                Message = command.Message?.Trim() ?? "",
                 EffectiveFrom = command.EffectiveFrom,
                 EffectiveTo = command.EffectiveTo,
                 UpdatedByExternalUserId = command.UpdatedByExternalUserId,
@@ -62,6 +62,65 @@ namespace ClosedServices_Admin.Data.Services
 
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
             logger.LogInformation("Created service status update for service {ServiceId}", command.ServiceId);
+        }
+
+        public async Task<ServiceStatusUpdateSummary?> GetCurrentOrNextStatusUpdate(Guid serviceId, Instant now, CancellationToken ct = default)
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(ct);
+
+            var currentUpdate = await context.ServiceStatusUpdates
+                .AsNoTracking()
+                .Where(x => x.ServiceId == serviceId && x.EffectiveFrom <= now && (x.EffectiveTo == null || x.EffectiveTo > now))
+                .OrderByDescending(x => x.EffectiveFrom)
+                .ThenByDescending(x => x.UpdatedAt)
+                .Select(x => new ServiceStatusUpdateSummary(
+                    x.Id,
+                    x.ClosureState,
+                    x.EffectiveFrom,
+                    x.EffectiveTo,
+                    x.Message,
+                    true))
+                .FirstOrDefaultAsync(ct)
+                .ConfigureAwait(false);
+
+            if (currentUpdate is not null)
+            {
+                return currentUpdate;
+            }
+
+            return await context.ServiceStatusUpdates
+                .AsNoTracking()
+                .Where(x => x.ServiceId == serviceId && x.EffectiveFrom > now)
+                .OrderBy(x => x.EffectiveFrom)
+                .ThenByDescending(x => x.UpdatedAt)
+                .Select(x => new ServiceStatusUpdateSummary(
+                    x.Id,
+                    x.ClosureState,
+                    x.EffectiveFrom,
+                    x.EffectiveTo,
+                    x.Message,
+                    false))
+                .FirstOrDefaultAsync(ct)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<bool> DeleteStatusUpdate(Guid serviceId, Guid statusUpdateId, CancellationToken ct = default)
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(ct);
+
+            var statusUpdate = await context.ServiceStatusUpdates
+                .FirstOrDefaultAsync(x => x.Id == statusUpdateId && x.ServiceId == serviceId, ct)
+                .ConfigureAwait(false);
+
+            if (statusUpdate is null)
+            {
+                return false;
+            }
+
+            context.ServiceStatusUpdates.Remove(statusUpdate);
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
+            logger.LogInformation("Deleted service status update {StatusUpdateId} for service {ServiceId}", statusUpdateId, serviceId);
+            return true;
         }
     }
 }

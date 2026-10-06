@@ -1,0 +1,28 @@
+@page "/services/{ServiceTypeRoute}/update/{ServiceId:guid}/remove-closure/{StatusUpdateId:guid}"
+@using Humanizer
+
+@if (isLoading)
+{
+    <GdsSpinner Show Message="Loading closure details..." ShowMessage />
+}
+else if (Service is not null && ClosureToRemove is not null)
+{
+    <PageTitle>Remove closure for @Service.Name - Closed Services Admin</PageTitle>
+    <GdsBackLink Href="@UpdatePageLink" />
+    <GdsHeading Level="1">Remove closure for @Service.Name</GdsHeading>
+
+    <p>This will remove the selected closure update for this service. If there are no other planned closures, your @Service.ServiceType.ToString().Singularize().ToLowerInvariant() will show as 'No disruption'</p>
+    <p><strong>Status:</strong> @ClosureStateText</p>
+    <p><strong>Effective from:</strong> @EffectiveFromText</p>
+    <p><strong>Effective to:</strong> @EffectiveToText</p>
+
+    @if (ValidationError is not null)
+    {
+        <GdsErrorMessage>@ValidationError</GdsErrorMessage>
+    }
+
+    <EditForm Model="this" OnValidSubmit="ConfirmDeleteAsync">
+        <button class="govuk-button govuk-button--warning" type="submit" disabled="@isDeleting">Confirm and remove closure</button>
+        <button class="govuk-button govuk-button--secondary" type="button" @onclick="CancelAsync" disabled="@isDeleting">Cancel</button>
+    </EditForm>
+}

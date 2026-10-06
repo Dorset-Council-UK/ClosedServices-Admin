@@ -7,5 +7,6 @@
   <Project Path="ClosedServices-Admin.Data/ClosedServices-Admin.Data.csproj" Id="74ed503f-8510-41ae-b03d-6e46f9f8a4cf" />
   <Project Path="ClosedServices-Admin.MigrationService/ClosedServices-Admin.MigrationService.csproj" />
   <Project Path="ClosedServices-Admin.ServiceDefaults/ClosedServices-Admin.ServiceDefaults.csproj" />
+  <Project Path="ClosedServices-Admin.Tests/ClosedServices-Admin.Tests.csproj" />
   <Project Path="ClosedServices-Admin.Web/ClosedServices-Admin.Web.csproj" />
 </Solution>

@@ -1,4 +1,5 @@
 @page "/services/{ServiceTypeRoute}/update/{ServiceId:guid}"
+@using Humanizer
 
 @if (isLoading)
 {
@@ -10,10 +11,24 @@ else if (Service is not null)
     <GdsBackLink Href="@BackLink" />
     <GdsHeading Level="1">Update @Service.Name</GdsHeading>
 
-    @if (CurrentStatus is not null)
+    @if (ShowRemovalSuccessMessage)
     {
         <GdsInsetText>
-            <strong>Current status: @CurrentStatus.ClosureState</strong><br />
+            <strong>Closure removed successfully.</strong>
+        </GdsInsetText>
+    }
+
+    @if (RemovableClosure is not null)
+    {
+        <GdsNotificationBanner BannerTitle="Current/Upcoming closure">
+            <p>@ClosureStatusText</p>
+            <GdsLink Href="@RemovalConfirmationLink">Remove this closure</GdsLink>
+        </GdsNotificationBanner>
+    }
+    else
+    {
+        <GdsInsetText>
+            <strong>This @Service.ServiceType.ToString().Singularize().ToLowerInvariant() has no current or planned closures</strong>
         </GdsInsetText>
     }
 
@@ -25,9 +40,9 @@ else if (Service is not null)
     <EditForm Model="this" OnValidSubmit="SaveAsync">
         <GdsFormGroup>
             <GdsFieldsetGroup>
-                <GdsFieldsetLegend><GdsFieldsetHeading Level="2">Set a new status</GdsFieldsetHeading></GdsFieldsetLegend>
+                <GdsFieldsetLegend><GdsFieldsetHeading Level="2">Are you fully closed or partially closed?</GdsFieldsetHeading></GdsFieldsetLegend>
                 <GdsRadios @bind-Value="SelectedClosureState">
-                    <GdsRadioItem><GdsInputRadio Value="@ClosureState.NoDisruption" /><GdsRadioLabel Text="No disruption" /></GdsRadioItem>
+                    
                     <GdsRadioItem><GdsInputRadio Value="@ClosureState.Closed" /><GdsRadioLabel Text="Closed" /></GdsRadioItem>
                     <GdsRadioItem><GdsInputRadio Value="@ClosureState.PartiallyClosed" /><GdsRadioLabel Text="Partially closed" /></GdsRadioItem>
                 </GdsRadios>
@@ -36,11 +51,23 @@ else if (Service is not null)
 
         <GdsFormGroup>
             <GdsFieldsetGroup>
-                <GdsFieldsetLegend><GdsFieldsetHeading Level="2">When should this status apply?</GdsFieldsetHeading></GdsFieldsetLegend>
+                <GdsFieldsetLegend><GdsFieldsetHeading Level="2">When are you closed?</GdsFieldsetHeading></GdsFieldsetLegend>
                 <GdsRadios @bind-Value="SelectedDuration">
-                    <GdsRadioItem><GdsInputRadio Value="@("today")" /><GdsRadioLabel Text="Just today" /></GdsRadioItem>
-                    <GdsRadioItem><GdsInputRadio Value="@("tomorrow")" /><GdsRadioLabel Text="Today and tomorrow" /></GdsRadioItem>
-                    <GdsRadioItem><GdsInputRadio Value="@("week")" /><GdsRadioLabel Text="All this week" /></GdsRadioItem>
+                    @if (ShowTodayOption)
+                    {
+                        <GdsRadioItem><GdsInputRadio Value="@("today")" /><GdsRadioLabel Text="Today" /></GdsRadioItem>
+                    }
+
+                    @if (ShowTodayAndNextOption)
+                    {
+                        <GdsRadioItem><GdsInputRadio Value="@("today-and-next")" /><GdsRadioLabel Text="@($"Today and {NextOperatingDayLabel}")" /></GdsRadioItem>
+                    }
+
+                    @if (ShowTomorrowOption)
+                    {
+                        <GdsRadioItem><GdsInputRadio Value="@("tomorrow")" /><GdsRadioLabel Text="@NextOperatingDayLabel" /></GdsRadioItem>
+                    }
+
                     <GdsRadioItem><GdsInputRadio Value="@("custom")" /><GdsRadioLabel Text="Custom" /></GdsRadioItem>
                 </GdsRadios>
             </GdsFieldsetGroup>
@@ -53,6 +80,7 @@ else if (Service is not null)
         }
 
         <GdsFormGroup>
+            <GdsHeading Level="2">Would you like to provide further information?</GdsHeading>
             <GdsLabel Text="Message (optional)" />
             <GdsHint>Provide any additional information about what is closed and why.</GdsHint>
             <InputTextArea rows="3" class="govuk-textarea" @bind-Value="Message" />

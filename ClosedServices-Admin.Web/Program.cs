@@ -19,6 +19,7 @@ builder
 
 builder.Services.AddScoped<IServicesService, ServicesService>();
 builder.Services.AddScoped<IServiceStatusService, ServiceStatusService>();
+builder.Services.AddScoped<IServiceOperatingHoursService, ServiceOperatingHoursService>();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

@@ -32,6 +32,7 @@ namespace ClosedServices_Admin.Data.Services
         {
             await using var context = await contextFactory.CreateDbContextAsync(ct);
             return await context.Services
+                .Include(s => s.OperatingDays)
                 .Where(s => s.Id == serviceId)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(ct)
@@ -70,6 +71,7 @@ namespace ClosedServices_Admin.Data.Services
                 .ToHashSet();
 
             return await context.Services
+                .Include(service => service.OperatingDays)
                 .AsNoTracking()
                 .Where(service => serviceIds.Contains(service.Id) || serviceTypes.Contains(service.ServiceType))
                 .ToListAsync(ct)
