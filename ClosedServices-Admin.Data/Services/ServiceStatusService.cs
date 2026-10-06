@@ -27,17 +27,7 @@ namespace ClosedServices_Admin.Data.Services
                 return new(update.ClosureState, true, update.EffectiveFrom, update.EffectiveTo, update.Message);
             }
 
-            var operatingDay = await context.ServiceOperatingDays
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.ServiceId == serviceId && x.DayOfWeek == now.ToDateTimeUtc().DayOfWeek, ct)
-                .ConfigureAwait(false);
-
-            var time = TimeOnly.FromDateTime(now.ToDateTimeUtc());
-            var isOpen = operatingDay is { IsOpen: true }
-                && (!operatingDay.OpenTime.HasValue || operatingDay.OpenTime <= time)
-                && (!operatingDay.CloseTime.HasValue || operatingDay.CloseTime > time);
-
-            return new(isOpen ? ClosureState.NoDisruption : ClosureState.Closed, false, null, null, null);
+            return new(ClosureState.NoDisruption, false, null, null, null);
         }
 
         public async Task CreateStatusUpdate(ServiceStatusUpdateCommand command, CancellationToken ct = default)
