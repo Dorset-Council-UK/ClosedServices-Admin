@@ -1,5 +1,9 @@
 using ClosedServices_Admin.Components;
+using ClosedServices_Admin.Components.Pages.Services;
+using ClosedServices_Admin.Data.Services;
+using ClosedServices_Admin.Validators;
 using ClosedServices_Admin_Shared.Options;
+using FluentValidation;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +19,11 @@ builder
     .AddAuthentication();
 
 // Add services to the container.
+builder.Services.AddScoped<IServicesService, ServicesService>();
+builder.Services.AddScoped<IServiceStatusService, ServiceStatusService>();
+builder.Services.AddScoped<IServiceOperatingHoursService, ServiceOperatingHoursService>();
+builder.Services.AddScoped<IValidator<UpdateServiceStatusFormModel>, UpdateServiceStatusFormModelValidator>();
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 

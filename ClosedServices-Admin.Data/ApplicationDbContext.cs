@@ -1,4 +1,5 @@
 ﻿using ClosedServices_Admin.Data.Models;
+using ClosedServices_Admin.Data.Enums;
 using ClosedServices_Admin_Shared.Options;
 
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,12 @@ namespace ClosedServices_Admin.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            var schema = string.IsNullOrWhiteSpace(databaseOptions.Value.Schema)
+                ? null
+                : databaseOptions.Value.Schema;
+
+            modelBuilder.HasPostgresEnum<ServiceType>(schema, "service_type");
+
             if (!string.IsNullOrWhiteSpace(databaseOptions.Value.Schema))
             {
                 modelBuilder.HasDefaultSchema(databaseOptions.Value.Schema);

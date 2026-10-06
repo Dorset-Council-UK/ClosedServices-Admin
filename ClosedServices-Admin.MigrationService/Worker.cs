@@ -1,3 +1,4 @@
+using Bogus;
 using ClosedServices_Admin.Data;
 using ClosedServices_Admin.Data.Models;
 using Microsoft.EntityFrameworkCore;
@@ -49,13 +50,17 @@ public class Worker(
     private static async Task SeedDataAsync(
         ApplicationDbContext dbContext, CancellationToken cancellationToken)
     {
-        Service school = new()
-        {
-            Name = "Test School",
-            ServiceType = Data.Enums.ServiceType.School,
-            ShortDescription = "A test school, designed for testing",
-            Geom = new NetTopologySuite.Geometries.Point(366646, 101677),
-        };
+        var fakeSchool = new Faker<Service>()
+            .RuleFor(x => x.Name, f => f.Company.CompanyName())
+            .RuleFor(x => x.ServiceType, f => Data.Enums.ServiceType.Schools)
+            .RuleFor(x => x.ShortDescription, f => f.Lorem.Sentence())
+            .RuleFor(x => x.Geom, f => new NetTopologySuite.Geometries.Point(f.Random.Double(330000, 423000), f.Random.Double(67000, 423000)));
+
+        var fakeLibrary = new Faker<Service>()
+            .RuleFor(x => x.Name, f => f.Company.CompanyName())
+            .RuleFor(x => x.ServiceType, f => Data.Enums.ServiceType.Libraries)
+            .RuleFor(x => x.ShortDescription, f => f.Lorem.Sentence())
+            .RuleFor(x => x.Geom, f => new NetTopologySuite.Geometries.Point(f.Random.Double(330000, 423000), f.Random.Double(67000, 423000)));
 
         var strategy = dbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>
@@ -64,9 +69,10 @@ public class Worker(
             await using var transaction = await dbContext.Database
                 .BeginTransactionAsync(cancellationToken);
 
-            if (!await dbContext.Services.AnyAsync(x => x.Name == school.Name, cancellationToken))
+            if (!await dbContext.Services.AnyAsync(cancellationToken))
             {
-                await dbContext.Services.AddAsync(school, cancellationToken);
+                await dbContext.Services.AddRangeAsync(fakeSchool.GenerateBetween(100,200), cancellationToken);
+                await dbContext.Services.AddRangeAsync(fakeLibrary.GenerateBetween(10, max: 20), cancellationToken);
                 await dbContext.SaveChangesAsync(cancellationToken);
             }
             await transaction.CommitAsync(cancellationToken);

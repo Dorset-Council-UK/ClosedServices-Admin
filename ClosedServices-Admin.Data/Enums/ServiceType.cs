@@ -2,7 +2,7 @@
 {
     public enum ServiceType
     {
-        School = 1,
-        Library = 2,
+        Schools = 1,
+        Libraries = 2,
     }
 }

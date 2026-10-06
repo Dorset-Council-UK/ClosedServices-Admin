@@ -1,6 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 var postgres = builder.AddPostgres("postgres")
+    .WithDataVolume()
+    .WithLifetime(ContainerLifetime.Persistent)
     .WithImage("postgis/postgis")
     .WithPgAdmin();
 var postgresdb = postgres.AddDatabase("closedservices-admin");

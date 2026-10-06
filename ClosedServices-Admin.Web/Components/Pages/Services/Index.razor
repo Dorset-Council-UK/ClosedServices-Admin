@@ -1,0 +1,33 @@
+﻿@page "/services/{ServiceTypeRoute}"
+
+<PageTitle>Services - Closed Services Admin</PageTitle>
+
+<GdsBackLink Href="" />
+
+<GdsHeading Level="1">Services</GdsHeading>
+
+@if(isLoading)
+{
+    <GdsSpinner Show Message="Loading services..." ShowMessage></GdsSpinner>
+}
+else
+{
+    if (Services.Count == 0)
+    {
+        <p>You do not have permission to update any @ServiceTypeDisplayName.</p>
+    }
+    else
+    {
+        <p>The list below shows all @ServiceTypeDisplayName.ToLowerInvariant() you have permission to update.</p>
+        <ul>
+            @foreach (var service in Services)
+            {
+                string link = $"services/{ParsedServiceType}/update/{service.Id}";
+
+                <li><GdsLink Href="@link">@service.Name</GdsLink></li>
+            }
+        </ul>
+    }
+}
+
+
