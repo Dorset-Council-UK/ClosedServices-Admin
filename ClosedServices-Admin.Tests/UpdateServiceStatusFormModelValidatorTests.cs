@@ -19,7 +19,7 @@ public class UpdateServiceStatusFormModelValidatorTests
         var result = sut.Validate(model);
 
         var startDateError = Assert.Single(result.Errors, error => error.PropertyName == nameof(UpdateServiceStatusFormModel.StartDate));
-        Assert.Equal("Enter a start date.", startDateError.ErrorMessage);
+        Assert.Equal("You must enter a start date if you've chosen a custom closure date.", startDateError.ErrorMessage);
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public class UpdateServiceStatusFormModelValidatorTests
         var result = sut.Validate(model);
 
         var endDateError = Assert.Single(result.Errors, error => error.PropertyName == nameof(UpdateServiceStatusFormModel.EndDate));
-        Assert.Equal("The end date must be the same as or after the start date.", endDateError.ErrorMessage);
+        Assert.Equal("The custom end date must be the same as or after the custom start date.", endDateError.ErrorMessage);
     }
 
     [Fact]

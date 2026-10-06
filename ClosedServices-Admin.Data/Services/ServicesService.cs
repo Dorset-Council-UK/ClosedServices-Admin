@@ -80,7 +80,7 @@ namespace ClosedServices_Admin.Data.Services
 
         public async Task<IReadOnlyCollection<Service>> GetServicesForUserByType(string userId, ServiceType serviceType, CancellationToken ct = default)
         {
-            var allServices = await GetServicesForUser(userId);
+            var allServices = await GetServicesForUser(userId, ct);
             return [.. allServices.Where(service => service.ServiceType == serviceType)];
         }
 
