@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClosedServices-Admin.Data\ClosedServices-Admin.Data.csproj" />
+    <ProjectReference Include="..\ClosedServices-Admin.Web\ClosedServices-Admin.Web.csproj" />
   </ItemGroup>
 
 </Project>

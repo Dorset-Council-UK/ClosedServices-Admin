@@ -1,6 +1,7 @@
 using ClosedServices_Admin.Data.Enums;
 using ClosedServices_Admin.Data.Models;
 using ClosedServices_Admin.Data.Services;
+using GdsBlazorComponents;
 using Humanizer;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -38,7 +39,6 @@ namespace ClosedServices_Admin.Components.Pages.Services
         private ServiceOperatingHoursEvaluation? OperatingHoursEvaluation { get; set; }
         private UpdateServiceStatusFormModel FormModel { get; } = new();
         private EditContext FormEditContext { get; set; } = null!;
-        private string? ValidationError { get; set; }
         private string CurrentStatusDayLabel { get; set; } = "Today";
         private string NextOperatingDayLabel { get; set; } = "Tomorrow";
         private bool ShowTodayOption { get; set; }
@@ -46,6 +46,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
         private bool ShowTomorrowOption { get; set; }
         private ServiceStatusUpdateSummary? RemovableClosure { get; set; }
         private bool ShowRemovalSuccessMessage { get; set; }
+        private string? SaveErrorMessage { get; set; }
         private bool isSaving;
 
         private string RemovalConfirmationLink => RemovableClosure is null
@@ -61,6 +62,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
         protected override void OnInitialized()
         {
             FormEditContext = new EditContext(FormModel);
+            FormEditContext.SetFieldCssClassProvider(new GdsFieldCssClassProvider());
         }
 
         protected override async Task OnParametersSetAsync()
@@ -125,11 +127,13 @@ namespace ClosedServices_Admin.Components.Pages.Services
 
         private async Task SaveAsync()
         {
-            ValidationError = null;
+            SaveErrorMessage = null;
+
             var now = SystemClock.Instance.GetCurrentInstant();
             var interval = GetInterval(now);
             if (interval is null)
             {
+                SaveErrorMessage = "Unable to determine a valid closure period from the values entered. Please review your dates and times and try again.";
                 return;
             }
 
@@ -143,7 +147,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error saving status update for service {ServiceId}", ServiceId);
-                ValidationError = "Unable to save the status update. Please try again.";
+                SaveErrorMessage = "Unable to save the status update. Please try again.";
             }
             finally
             {
@@ -157,7 +161,6 @@ namespace ClosedServices_Admin.Components.Pages.Services
             {
                 if (OperatingHoursEvaluation is null)
                 {
-                    ValidationError = "Unable to determine service operating hours.";
                     return null;
                 }
 
@@ -177,7 +180,6 @@ namespace ClosedServices_Admin.Components.Pages.Services
 
             if (FormModel.StartDate is null)
             {
-                ValidationError = "Enter a start date.";
                 return null;
             }
 
@@ -185,7 +187,6 @@ namespace ClosedServices_Admin.Components.Pages.Services
             Instant? end = FormModel.EndDate is null ? null : AtTime(FormModel.EndDate.Value, FormModel.EndTime ?? TimeOnly.MaxValue);
             if (end is not null && end <= start)
             {
-                ValidationError = "The end date and time must be after the start date and time.";
                 return null;
             }
 
@@ -232,7 +233,6 @@ namespace ClosedServices_Admin.Components.Pages.Services
 
         private (Instant Start, Instant? End)? InvalidPresetSelection()
         {
-            ValidationError = "Select a valid preset duration for this service's operating hours.";
             return null;
         }
 
@@ -272,15 +272,5 @@ namespace ClosedServices_Admin.Components.Pages.Services
             return string.Equals(removed.ToString(), "true", StringComparison.OrdinalIgnoreCase);
         }
 
-        private sealed class UpdateServiceStatusFormModel
-        {
-            public ClosureState SelectedClosureState { get; set; } = ClosureState.Closed;
-            public string SelectedDuration { get; set; } = "custom";
-            public DateOnly? StartDate { get; set; }
-            public TimeOnly? StartTime { get; set; }
-            public DateOnly? EndDate { get; set; }
-            public TimeOnly? EndTime { get; set; }
-            public string? Message { get; set; }
-        }
     }
 }
