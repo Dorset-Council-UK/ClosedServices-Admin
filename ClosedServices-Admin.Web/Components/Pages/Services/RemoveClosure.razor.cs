@@ -42,7 +42,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
 
         private string EffectiveFromText => ClosureToRemove is null ? string.Empty : FormatDateTime(ClosureToRemove.EffectiveFrom);
 
-        private string EffectiveToText => ClosureToRemove?.EffectiveTo is null ? "Not set" : FormatDateTime(ClosureToRemove.EffectiveTo.Value);
+        private string EffectiveToText => ClosureToRemove?.EffectiveTo is null ? "Indefinite" : FormatDateTime(ClosureToRemove.EffectiveTo.Value);
 
         protected override async Task OnParametersSetAsync()
         {
