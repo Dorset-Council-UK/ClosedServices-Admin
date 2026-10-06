@@ -4,6 +4,7 @@ using ClosedServices_Admin.Data.Services;
 using Humanizer;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.WebUtilities;
 using NodaTime;
 using System.Security.Claims;
@@ -35,13 +36,8 @@ namespace ClosedServices_Admin.Components.Pages.Services
         private bool isLoading = false;
         private ServiceCurrentStatus? CurrentStatus { get; set; }
         private ServiceOperatingHoursEvaluation? OperatingHoursEvaluation { get; set; }
-        private ClosureState SelectedClosureState { get; set; } = ClosureState.Closed;
-        private string SelectedDuration { get; set; } = "custom";
-        private DateOnly? StartDate { get; set; }
-        private TimeOnly? StartTime { get; set; }
-        private DateOnly? EndDate { get; set; }
-        private TimeOnly? EndTime { get; set; }
-        private string? Message { get; set; }
+        private UpdateServiceStatusFormModel FormModel { get; } = new();
+        private EditContext FormEditContext { get; set; } = null!;
         private string? ValidationError { get; set; }
         private string CurrentStatusDayLabel { get; set; } = "Today";
         private string NextOperatingDayLabel { get; set; } = "Tomorrow";
@@ -61,6 +57,11 @@ namespace ClosedServices_Admin.Components.Pages.Services
             : RemovableClosure.IsCurrent
                 ? $"This {ServiceTypeDisplayName.Singularize().ToLowerInvariant()} is currently {FormatClosureState(RemovableClosure.ClosureState)}"
                 : $"This {ServiceTypeDisplayName.Singularize().ToLowerInvariant()} has an upcoming closure on {FormatClosureDate(RemovableClosure.EffectiveFrom)}";
+
+        protected override void OnInitialized()
+        {
+            FormEditContext = new EditContext(FormModel);
+        }
 
         protected override async Task OnParametersSetAsync()
         {
@@ -136,7 +137,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
             {
                 isSaving = true;
                 var authState = await AuthenticationState!;
-                await serviceStatusService.CreateStatusUpdate(new(ServiceId, SelectedClosureState, Message, interval.Value.Start, interval.Value.End, authState.User.UserId));
+                await serviceStatusService.CreateStatusUpdate(new(ServiceId, FormModel.SelectedClosureState, FormModel.Message, interval.Value.Start, interval.Value.End, authState.User.UserId));
                 navigationManager.NavigateTo(BackLink);
             }
             catch (Exception ex)
@@ -152,7 +153,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
 
         private (Instant Start, Instant? End)? GetInterval(Instant now)
         {
-            if (SelectedDuration != "custom")
+            if (FormModel.SelectedDuration != "custom")
             {
                 if (OperatingHoursEvaluation is null)
                 {
@@ -160,7 +161,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
                     return null;
                 }
 
-                return SelectedDuration switch
+                return FormModel.SelectedDuration switch
                 {
                     "today" when ShowTodayOption && OperatingHoursEvaluation.TodayPeriod is not null
                         => (now, OperatingHoursEvaluation.TodayPeriod.CloseInstant),
@@ -174,14 +175,14 @@ namespace ClosedServices_Admin.Components.Pages.Services
                 };
             }
 
-            if (StartDate is null)
+            if (FormModel.StartDate is null)
             {
                 ValidationError = "Enter a start date.";
                 return null;
             }
 
-            var start = AtTime(StartDate.Value, StartTime ?? TimeOnly.MinValue);
-            Instant? end = EndDate is null ? null : AtTime(EndDate.Value, EndTime ?? TimeOnly.MaxValue);
+            var start = AtTime(FormModel.StartDate.Value, FormModel.StartTime ?? TimeOnly.MinValue);
+            Instant? end = FormModel.EndDate is null ? null : AtTime(FormModel.EndDate.Value, FormModel.EndTime ?? TimeOnly.MaxValue);
             if (end is not null && end <= start)
             {
                 ValidationError = "The end date and time must be after the start date and time.";
@@ -195,7 +196,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
         {
             if (OperatingHoursEvaluation is null)
             {
-                SelectedDuration = "custom";
+                FormModel.SelectedDuration = "custom";
                 return;
             }
 
@@ -222,7 +223,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
                     localNowDate);
             }
 
-            SelectedDuration = ShowTodayOption
+            FormModel.SelectedDuration = ShowTodayOption
                 ? "today"
                 : ShowTomorrowOption
                     ? "tomorrow"
@@ -269,6 +270,17 @@ namespace ClosedServices_Admin.Components.Pages.Services
             }
 
             return string.Equals(removed.ToString(), "true", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private sealed class UpdateServiceStatusFormModel
+        {
+            public ClosureState SelectedClosureState { get; set; } = ClosureState.Closed;
+            public string SelectedDuration { get; set; } = "custom";
+            public DateOnly? StartDate { get; set; }
+            public TimeOnly? StartTime { get; set; }
+            public DateOnly? EndDate { get; set; }
+            public TimeOnly? EndTime { get; set; }
+            public string? Message { get; set; }
         }
     }
 }
