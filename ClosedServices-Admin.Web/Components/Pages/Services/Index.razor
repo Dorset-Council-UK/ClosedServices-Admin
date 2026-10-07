@@ -12,21 +12,27 @@
 }
 else
 {
-    if (Services.Count == 0)
+    if (ServiceOverviews.Count == 0)
     {
         <p>You do not have permission to update any @ServiceTypeDisplayName.</p>
     }
     else
     {
         <p>The list below shows all @ServiceTypeDisplayName.ToLowerInvariant() you have permission to update.</p>
-        <ul>
-            @foreach (var service in Services)
+        <GdsTaskList>
+            @foreach (var serviceOverview in ServiceOverviews.OrderBy(overview => overview.Service.Name))
             {
-                string link = $"services/{ParsedServiceType}/update/{service.Id}";
+                string link = $"services/{ParsedServiceType}/update/{serviceOverview.Service.Id}";
 
-                <li><GdsLink Href="@link">@service.Name</GdsLink></li>
+                <GdsTaskListItem Text="@serviceOverview.Service.Name" Href="@link">
+                    <Status>
+                        <GdsTag Text="@GetStatusText(serviceOverview.CurrentStatus.ClosureState)" Colour="@GetStatusTagColour(serviceOverview.CurrentStatus.ClosureState)" />
+                    </Status>
+                </GdsTaskListItem>
             }
-        </ul>
+
+        </GdsTaskList>
+
     }
 }
 

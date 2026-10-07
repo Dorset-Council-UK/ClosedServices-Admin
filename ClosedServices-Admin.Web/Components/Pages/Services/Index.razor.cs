@@ -1,13 +1,15 @@
 using ClosedServices_Admin.Data.Enums;
-using ClosedServices_Admin.Data.Models;
 using ClosedServices_Admin.Data.Services;
+using GdsBlazorComponents;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using NodaTime;
 using System.Security.Claims;
 
 namespace ClosedServices_Admin.Components.Pages.Services
 {
     public partial class Index(IServicesService servicesService,
+        IServiceStatusService serviceStatusService,
         ILogger<Home> logger,
         NavigationManager navigationManager)
     {
@@ -21,7 +23,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
 
         private string ServiceTypeDisplayName => ParsedServiceType?.ToString() ?? ServiceTypeRoute;
 
-        private IReadOnlyCollection<Service> Services { get; set; } = Array.Empty<Service>();
+        private IReadOnlyCollection<ServiceStatusOverview> ServiceOverviews { get; set; } = [];
 
         private bool isLoading = false;
 
@@ -56,7 +58,9 @@ namespace ClosedServices_Admin.Components.Pages.Services
                     return;
                 }
 
-                Services = await servicesService.GetServicesForUserByType(authState.User.UserId, parsedServiceType);
+                var services = await servicesService.GetServicesForUserByType(authState.User.UserId, parsedServiceType);
+                var now = SystemClock.Instance.GetCurrentInstant();
+                ServiceOverviews = await serviceStatusService.GetStatusOverviews([.. services.Select(service => service.Id)], now);
             }catch(Exception ex)
             {
                 logger.LogError(ex, "Error loading services for user");
@@ -66,6 +70,26 @@ namespace ClosedServices_Admin.Components.Pages.Services
             {
                 isLoading = false;
             }
+        }
+
+        private static string GetStatusText(ClosureState closureState)
+        {
+            return closureState switch
+            {
+                ClosureState.Closed => "Closed",
+                ClosureState.PartiallyClosed => "Partially closed",
+                _ => "No disruption",
+            };
+        }
+
+        private static GdsTagColour GetStatusTagColour(ClosureState closureState)
+        {
+            return closureState switch
+            {
+                ClosureState.Closed => GdsTagColour.Red,
+                ClosureState.PartiallyClosed => GdsTagColour.Yellow,
+                _ => GdsTagColour.Green,
+            };
         }
     }
 }

@@ -10,24 +10,68 @@ namespace ClosedServices_Admin.Data.Services
         IDbContextFactory<ApplicationDbContext> contextFactory,
         ILogger<ServiceStatusService> logger) : IServiceStatusService
     {
+        public async Task<IReadOnlyCollection<ServiceStatusOverview>> GetStatusOverviews(IReadOnlyCollection<Guid> serviceIds, Instant now, CancellationToken ct = default)
+        {
+            if (serviceIds.Count == 0)
+            {
+                return [];
+            }
+
+            var requestedServiceIds = serviceIds
+                .Where(serviceId => serviceId != Guid.Empty)
+                .ToHashSet();
+
+            if (requestedServiceIds.Count == 0)
+            {
+                return [];
+            }
+
+            await using var context = await contextFactory.CreateDbContextAsync(ct);
+
+            var services = await context.Services
+                .Include(service => service.OperatingDays)
+                .AsNoTracking()
+                .Where(service => requestedServiceIds.Contains(service.Id))
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
+
+            if (services.Count == 0)
+            {
+                return [];
+            }
+
+            var serviceStatusUpdates = await context.ServiceStatusUpdates
+                .Include(update => update.ClosureReason)
+                .AsNoTracking()
+                .Where(update => requestedServiceIds.Contains(update.ServiceId) && (update.EffectiveTo == null || update.EffectiveTo > now))
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
+
+            var statusUpdatesByServiceId = serviceStatusUpdates.ToLookup(update => update.ServiceId);
+
+            return [.. services.Select(service =>
+            {
+                var updatesForService = statusUpdatesByServiceId[service.Id];
+                var currentStatus = ResolveCurrentStatus(updatesForService, now);
+                var upcomingStatuses = ResolveUpcomingStatusUpdates(updatesForService, now)
+                    .Select(update => ToStatusUpdateSummary(update, false))
+                    .ToArray();
+
+                return new ServiceStatusOverview(service, currentStatus, upcomingStatuses);
+            })];
+        }
+
         public async Task<ServiceCurrentStatus> GetCurrentStatus(Guid serviceId, Instant now, CancellationToken ct = default)
         {
             await using var context = await contextFactory.CreateDbContextAsync(ct);
 
             var update = await context.ServiceStatusUpdates
                 .AsNoTracking()
-                .Where(x => x.ServiceId == serviceId && x.EffectiveFrom <= now && (x.EffectiveTo == null || x.EffectiveTo > now))
-                .OrderByDescending(x => x.EffectiveFrom)
-                .ThenByDescending(x => x.UpdatedAt)
-                .FirstOrDefaultAsync(ct)
+                .Where(x => x.ServiceId == serviceId && (x.EffectiveTo == null || x.EffectiveTo > now))
+                .ToListAsync(ct)
                 .ConfigureAwait(false);
 
-            if (update is not null)
-            {
-                return new(update.ClosureState, true, update.EffectiveFrom, update.EffectiveTo, update.ClosureReasonId, update.Message);
-            }
-
-            return new(ClosureState.NoDisruption, false, null, null, null, null);
+            return ResolveCurrentStatus(update, now);
         }
 
         public async Task CreateStatusUpdate(ServiceStatusUpdateCommand command, CancellationToken ct = default)
@@ -69,42 +113,24 @@ namespace ClosedServices_Admin.Data.Services
         {
             await using var context = await contextFactory.CreateDbContextAsync(ct);
 
-            var currentUpdate = await context.ServiceStatusUpdates
+            var updates = await context.ServiceStatusUpdates
+                .Include(x => x.ClosureReason)
                 .AsNoTracking()
-                .Where(x => x.ServiceId == serviceId && x.EffectiveFrom <= now && (x.EffectiveTo == null || x.EffectiveTo > now))
-                .OrderByDescending(x => x.EffectiveFrom)
-                .ThenByDescending(x => x.UpdatedAt)
-                .Select(x => new ServiceStatusUpdateSummary(
-                    x.Id,
-                    x.ClosureState,
-                    x.EffectiveFrom,
-                    x.EffectiveTo,
-                    x.ClosureReason,
-                    x.Message,
-                    true))
-                .FirstOrDefaultAsync(ct)
+                .Where(x => x.ServiceId == serviceId && (x.EffectiveTo == null || x.EffectiveTo > now))
+                .ToListAsync(ct)
                 .ConfigureAwait(false);
+
+            var currentUpdate = ResolveCurrentUpdate(updates, now);
 
             if (currentUpdate is not null)
             {
-                return currentUpdate;
+                return ToStatusUpdateSummary(currentUpdate, true);
             }
 
-            return await context.ServiceStatusUpdates
-                .AsNoTracking()
-                .Where(x => x.ServiceId == serviceId && x.EffectiveFrom > now)
-                .OrderBy(x => x.EffectiveFrom)
-                .ThenByDescending(x => x.UpdatedAt)
-                .Select(x => new ServiceStatusUpdateSummary(
-                    x.Id,
-                    x.ClosureState,
-                    x.EffectiveFrom,
-                    x.EffectiveTo,
-                    x.ClosureReason,
-                    x.Message,
-                    false))
-                .FirstOrDefaultAsync(ct)
-                .ConfigureAwait(false);
+            var nextUpdate = ResolveUpcomingStatusUpdates(updates, now).FirstOrDefault();
+            return nextUpdate is null
+                ? null
+                : ToStatusUpdateSummary(nextUpdate, false);
         }
 
         public async Task<bool> DeleteStatusUpdate(Guid serviceId, Guid statusUpdateId, CancellationToken ct = default)
@@ -132,6 +158,48 @@ namespace ClosedServices_Admin.Data.Services
 
             return await context.ClosureReasons.OrderBy(c => c.Order).ToListAsync(ct);
 
+        }
+
+        private static bool IsCurrentOrFuture(ServiceStatusUpdate update, Instant now)
+        {
+            return update.EffectiveTo == null || update.EffectiveTo > now;
+        }
+
+        private static ServiceStatusUpdate? ResolveCurrentUpdate(IEnumerable<ServiceStatusUpdate> updates, Instant now)
+        {
+            return updates
+                .Where(update => update.EffectiveFrom <= now && IsCurrentOrFuture(update, now))
+                .OrderByDescending(update => update.EffectiveFrom)
+                .ThenByDescending(update => update.UpdatedAt)
+                .FirstOrDefault();
+        }
+
+        private static ServiceCurrentStatus ResolveCurrentStatus(IEnumerable<ServiceStatusUpdate> updates, Instant now)
+        {
+            var currentUpdate = ResolveCurrentUpdate(updates, now);
+            return currentUpdate is null
+                ? new ServiceCurrentStatus(ClosureState.NoDisruption, false, null, null, null, null)
+                : new ServiceCurrentStatus(currentUpdate.ClosureState, true, currentUpdate.EffectiveFrom, currentUpdate.EffectiveTo, currentUpdate.ClosureReasonId, currentUpdate.Message);
+        }
+
+        private static IEnumerable<ServiceStatusUpdate> ResolveUpcomingStatusUpdates(IEnumerable<ServiceStatusUpdate> updates, Instant now)
+        {
+            return updates
+                .Where(update => update.EffectiveFrom > now)
+                .OrderBy(update => update.EffectiveFrom)
+                .ThenByDescending(update => update.UpdatedAt);
+        }
+
+        private static ServiceStatusUpdateSummary ToStatusUpdateSummary(ServiceStatusUpdate update, bool isCurrent)
+        {
+            return new ServiceStatusUpdateSummary(
+                update.Id,
+                update.ClosureState,
+                update.EffectiveFrom,
+                update.EffectiveTo,
+                update.ClosureReason,
+                update.Message,
+                isCurrent);
         }
     }
 }
