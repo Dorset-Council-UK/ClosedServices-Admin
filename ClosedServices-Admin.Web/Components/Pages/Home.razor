@@ -17,19 +17,33 @@
         {
             @if (Services.Count == 0)
             {
-                <p>You do not have permission to update any services.</p>
+                
+                <GdsWarning Text="You do not have permission to update any services" />
+                <p>If this is wrong, contact your system administrator.</p>
             }
             else
             {
                 <p>You have permission to update the following services.</p>
-                <ul>
-                    @foreach (var service in Services.GroupBy(s => s.ServiceType))
-                    {
-                        string link = $"services/{service.Key}";
 
-                        <li><GdsLink Href="@link">@service.Key</GdsLink></li>
-                    }
-                </ul>
+                <GdsContainer>
+                    <GdsGridRow>
+                        @foreach(var group in Services.GroupBy(s => s.ServiceType).Chunk(3)){
+                            @foreach(var service in group)
+                            {
+                                string link = $"services/{service.Key}";
+                                string bodyText = $"Update {service.Key.ToString().ToLowerInvariant()} you have permission to update";
+                                <GridCard CardSize="GridCard.CardSizes.OneThird"
+                                          BodyText="@bodyText"
+                                          HeaderText="@service.Key.ToString()"
+                                          AriaLabel="@bodyText"
+                                          LinkURL="@link" />
+                            }
+                        }
+
+                    </GdsGridRow>
+                </GdsContainer>
+
+
             }
         }
     </Authorized>

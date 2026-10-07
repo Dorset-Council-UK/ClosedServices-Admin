@@ -1,0 +1,31 @@
+.info_panel__clickable {
+  float: left;
+  padding: 15px;
+  position: relative;
+}
+
+.info_panel__item {
+  padding: 0;
+  background-color: #05476d;
+}
+
+.info_panel__content {
+  color: white;
+}
+
+.info_panel__title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.info_panel__link {
+  display: block;
+  box-sizing: border-box;
+  padding: 15px;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
