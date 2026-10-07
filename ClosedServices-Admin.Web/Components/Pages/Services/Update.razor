@@ -102,13 +102,28 @@ else if (Service is not null)
             </GdsFieldsetGroup>
         </GdsFormGroup>
 
-        <GdsFormGroup>
-            <GdsHeading Level="2">Would you like to provide further information?</GdsHeading>
-            <label for="messageTextInput">Message (optional)</label>
-            <GdsErrorMessage />
-            <GdsHint>Provide any additional information about what is closed and why.</GdsHint>
-            <InputTextArea id="messageTextInput" rows="3" class="govuk-textarea" @bind-Value="FormModel.Message" />
-        </GdsFormGroup>
+        <GdsFieldsetGroup>
+            <GdsFieldsetLegend><GdsFieldsetHeading Level="2">Would you like to provide further information?</GdsFieldsetHeading></GdsFieldsetLegend>
+            <GdsFormGroup>
+                <GdsLabel Text="Closure reason (optional)" />
+                <GdsErrorMessage />
+                <GdsSelect @bind-Value="FormModel.SelectedClosureReason" T="Guid?">
+                    <option value=""></option>
+                    @foreach(var closureReason in ClosureReasons)
+                    {
+                        bool selected = closureReason.Id == FormModel.SelectedClosureReason;
+                        <option value="@closureReason.Id" selected="@selected">@closureReason.Name</option>
+                    }
+                </GdsSelect>
+            </GdsFormGroup>
+
+            <GdsFormGroup>
+                <label for="messageTextInput">Message (optional)</label>
+                <GdsErrorMessage />
+                <GdsHint>Provide any additional information about what is closed and why.</GdsHint>
+                <InputTextArea id="messageTextInput" rows="3" class="govuk-textarea" @bind-Value="FormModel.Message" />
+            </GdsFormGroup>
+        </GdsFieldsetGroup>
 
         @if (!string.IsNullOrWhiteSpace(SaveErrorMessage))
         {

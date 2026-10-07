@@ -50,6 +50,45 @@ public class Worker(
     private static async Task SeedDataAsync(
         ApplicationDbContext dbContext, CancellationToken cancellationToken)
     {
+        ClosureReason[] closureReasons =
+        [
+            new()
+            {
+                Name = "Weather",
+                Order = 1,
+            },
+            new()
+            {
+                Name = "Staff Shortage",
+                Order = 2,
+            },
+            new()
+            {
+                Name = "Maintenance issue",
+                Order = 3,
+            },
+            new()
+            {
+                Name = "Illness",
+                Order = 4,
+            },
+            new()
+            {
+                Name = "Strike action",
+                Order = 5,
+            },
+            new()
+            {
+                Name = "Government mandated",
+                Order = 6,
+            },
+            new()
+            {
+                Name = "Other",
+                Order = 99,
+            },
+        ];
+
         var fakeSchool = new Faker<Service>()
             .RuleFor(x => x.Name, f => f.Company.CompanyName())
             .RuleFor(x => x.ServiceType, f => Data.Enums.ServiceType.Schools)
@@ -68,6 +107,12 @@ public class Worker(
             // Seed the database
             await using var transaction = await dbContext.Database
                 .BeginTransactionAsync(cancellationToken);
+
+            if(!await dbContext.ClosureReasons.AnyAsync(cancellationToken))
+            {
+                await dbContext.ClosureReasons.AddRangeAsync(closureReasons, cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
 
             if (!await dbContext.Services.AnyAsync(cancellationToken))
             {

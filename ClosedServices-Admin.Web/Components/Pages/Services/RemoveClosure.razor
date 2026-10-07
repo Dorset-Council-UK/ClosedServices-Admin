@@ -12,9 +12,41 @@ else if (Service is not null && ClosureToRemove is not null)
     <GdsHeading Level="1">Remove closure for @Service.Name</GdsHeading>
 
     <p>This will remove the selected closure update for this service. If there are no other planned closures, your @Service.ServiceType.ToString().Singularize().ToLowerInvariant() will show as 'No disruption'</p>
-    <p><strong>Status:</strong> @ClosureStateText</p>
-    <p><strong>Effective from:</strong> @EffectiveFromText</p>
-    <p><strong>Effective to:</strong> @EffectiveToText</p>
+
+    <dl class="govuk-summary-list">
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+                Status
+            </dt>
+            <dd class="govuk-summary-list__value">
+                @ClosureStateText
+            </dd>
+        </div>
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+                Closure reason
+            </dt>
+            <dd class="govuk-summary-list__value">
+                @(ClosureToRemove.ClosureReason?.Name ?? "No reason provided")
+            </dd>
+        </div>
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+                Effective from
+            </dt>
+            <dd class="govuk-summary-list__value">
+                @EffectiveFromText
+            </dd>
+        </div>
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+                Effective to
+            </dt>
+            <dd class="govuk-summary-list__value">
+                @EffectiveToText
+            </dd>
+        </div>
+    </dl>
 
     @if (ValidationError is not null)
     {

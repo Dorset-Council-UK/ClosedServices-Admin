@@ -12,6 +12,8 @@ namespace ClosedServices_Admin.Data.Models
         public Service Service { get; set; } = null!;
 
         public ClosureState ClosureState { get; set; }
+        public ClosureReason? ClosureReason { get; set; }
+        public Guid? ClosureReasonId { get; set; }
 
         [Required]
         [MaxLength(2000)]

@@ -13,6 +13,7 @@ namespace ClosedServices_Admin.Data
         public DbSet<ServiceOperatingDay> ServiceOperatingDays { get; set; }
         public DbSet<ServiceStatusUpdate> ServiceStatusUpdates { get; set; }
         public DbSet<UserServicePermission> UserServicePermissions { get; set; }
+        public DbSet<ClosureReason> ClosureReasons { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

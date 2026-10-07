@@ -1,4 +1,5 @@
 using ClosedServices_Admin.Data.Enums;
+using ClosedServices_Admin.Data.Models;
 using NodaTime;
 
 namespace ClosedServices_Admin.Data.Services
@@ -9,6 +10,7 @@ namespace ClosedServices_Admin.Data.Services
         Task<ServiceStatusUpdateSummary?> GetCurrentOrNextStatusUpdate(Guid serviceId, Instant now, CancellationToken ct = default);
         Task CreateStatusUpdate(ServiceStatusUpdateCommand command, CancellationToken ct = default);
         Task<bool> DeleteStatusUpdate(Guid serviceId, Guid statusUpdateId, CancellationToken ct = default);
+        Task<IReadOnlyCollection<ClosureReason>> GetClosureReasons(CancellationToken ct = default);
     }
 
     public sealed record ServiceCurrentStatus(
@@ -16,11 +18,13 @@ namespace ClosedServices_Admin.Data.Services
         bool IsOverride,
         Instant? EffectiveFrom,
         Instant? EffectiveTo,
+        Guid? ClosureReason,
         string? Message);
 
     public sealed record ServiceStatusUpdateCommand(
         Guid ServiceId,
         ClosureState ClosureState,
+        Guid? ClosureReason,
         string? Message,
         Instant EffectiveFrom,
         Instant? EffectiveTo,
@@ -31,6 +35,7 @@ namespace ClosedServices_Admin.Data.Services
         ClosureState ClosureState,
         Instant EffectiveFrom,
         Instant? EffectiveTo,
+        ClosureReason? ClosureReason,
         string? Message,
         bool IsCurrent);
 }
