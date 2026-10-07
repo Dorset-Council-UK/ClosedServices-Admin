@@ -9,7 +9,7 @@ namespace ClosedServices_Admin.Data.EntitiesConfiguration
         {
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Message).IsRequired().HasMaxLength(2000);
+            builder.Property(x => x.Message).HasMaxLength(1000);
             builder.Property(x => x.UpdatedByExternalUserId).IsRequired().HasMaxLength(200);
 
             builder.HasOne(x => x.Service)

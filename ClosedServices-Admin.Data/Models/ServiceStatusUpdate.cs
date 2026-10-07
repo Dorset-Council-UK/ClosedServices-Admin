@@ -15,9 +15,7 @@ namespace ClosedServices_Admin.Data.Models
         public ClosureReason? ClosureReason { get; set; }
         public Guid? ClosureReasonId { get; set; }
 
-        [Required]
-        [MaxLength(2000)]
-        public string Message { get; set; } = string.Empty;
+        public string? Message { get; set; }
 
         public Instant EffectiveFrom { get; set; }
 
