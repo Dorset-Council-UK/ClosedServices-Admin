@@ -26,9 +26,10 @@
                 <p>You have permission to update the following services.</p>
 
                 <GdsContainer>
-                    <GdsGridRow>
-                        @foreach(var group in Services.GroupBy(s => s.ServiceType).Chunk(3)){
-                            @foreach(var service in group)
+                    @foreach (var group in Services.GroupBy(s => s.ServiceType).Chunk(3))
+                    {
+                        <GdsGridRow>
+                            @foreach (var service in group)
                             {
                                 string link = $"services/{service.Key}";
                                 string bodyText = $"Update {service.Key.ToString().ToLowerInvariant()} you have permission to update";
@@ -38,9 +39,8 @@
                                           AriaLabel="@bodyText"
                                           LinkURL="@link" />
                             }
-                        }
-
-                    </GdsGridRow>
+                        </GdsGridRow>
+                    }
                 </GdsContainer>
 
 
