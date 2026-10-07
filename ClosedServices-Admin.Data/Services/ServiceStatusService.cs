@@ -24,10 +24,10 @@ namespace ClosedServices_Admin.Data.Services
 
             if (update is not null)
             {
-                return new(update.ClosureState, true, update.EffectiveFrom, update.EffectiveTo, update.Message);
+                return new(update.ClosureState, true, update.EffectiveFrom, update.EffectiveTo, update.ClosureReasonId, update.Message);
             }
 
-            return new(ClosureState.NoDisruption, false, null, null, null);
+            return new(ClosureState.NoDisruption, false, null, null, null, null);
         }
 
         public async Task CreateStatusUpdate(ServiceStatusUpdateCommand command, CancellationToken ct = default)
@@ -53,7 +53,8 @@ namespace ClosedServices_Admin.Data.Services
                 Id = Guid.NewGuid(),
                 ServiceId = command.ServiceId,
                 ClosureState = command.ClosureState,
-                Message = command.Message?.Trim() ?? "",
+                ClosureReasonId = command.ClosureReason,
+                Message = command.Message?.Trim(),
                 EffectiveFrom = command.EffectiveFrom,
                 EffectiveTo = command.EffectiveTo,
                 UpdatedByExternalUserId = command.UpdatedByExternalUserId,
@@ -78,6 +79,7 @@ namespace ClosedServices_Admin.Data.Services
                     x.ClosureState,
                     x.EffectiveFrom,
                     x.EffectiveTo,
+                    x.ClosureReason,
                     x.Message,
                     true))
                 .FirstOrDefaultAsync(ct)
@@ -98,6 +100,7 @@ namespace ClosedServices_Admin.Data.Services
                     x.ClosureState,
                     x.EffectiveFrom,
                     x.EffectiveTo,
+                    x.ClosureReason,
                     x.Message,
                     false))
                 .FirstOrDefaultAsync(ct)
@@ -121,6 +124,14 @@ namespace ClosedServices_Admin.Data.Services
             await context.SaveChangesAsync(ct).ConfigureAwait(false);
             logger.LogInformation("Deleted service status update {StatusUpdateId} for service {ServiceId}", statusUpdateId, serviceId);
             return true;
+        }
+
+        public async Task<IReadOnlyCollection<ClosureReason>> GetClosureReasons(CancellationToken ct)
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(ct);
+
+            return await context.ClosureReasons.OrderBy(c => c.Order).ToListAsync(ct);
+
         }
     }
 }

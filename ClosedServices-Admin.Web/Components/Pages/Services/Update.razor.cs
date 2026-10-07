@@ -38,6 +38,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
         private ServiceCurrentStatus? CurrentStatus { get; set; }
         private ServiceOperatingHoursEvaluation? OperatingHoursEvaluation { get; set; }
         private UpdateServiceStatusFormModel FormModel { get; } = new();
+        private IReadOnlyCollection<ClosureReason> ClosureReasons { get; set; } = [];
         private EditContext FormEditContext { get; set; } = null!;
         private string CurrentStatusDayLabel { get; set; } = "Today";
         private string NextOperatingDayLabel { get; set; } = "Tomorrow";
@@ -113,6 +114,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
 
                 CurrentStatus = await serviceStatusService.GetCurrentStatus(ServiceId, statusInstant);
                 RemovableClosure = await serviceStatusService.GetCurrentOrNextStatusUpdate(ServiceId, now);
+                ClosureReasons = await serviceStatusService.GetClosureReasons();
             }
             catch (Exception ex)
             {
@@ -141,7 +143,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
             {
                 isSaving = true;
                 var authState = await AuthenticationState!;
-                await serviceStatusService.CreateStatusUpdate(new(ServiceId, FormModel.SelectedClosureState, FormModel.Message, interval.Value.Start, interval.Value.End, authState.User.UserId));
+                await serviceStatusService.CreateStatusUpdate(new(ServiceId, FormModel.SelectedClosureState, FormModel.SelectedClosureReason, FormModel.Message, interval.Value.Start, interval.Value.End, authState.User.UserId));
                 navigationManager.NavigateTo(BackLink);
             }
             catch (Exception ex)
