@@ -41,4 +41,8 @@
     <ProjectReference Include="..\ClosedServices-Admin.ServiceDefaults\ClosedServices-Admin.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="ClosedServices-Admin.Tests" />
+  </ItemGroup>
+
 </Project>
