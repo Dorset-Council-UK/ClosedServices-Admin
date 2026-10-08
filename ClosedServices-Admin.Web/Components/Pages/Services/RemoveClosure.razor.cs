@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using NodaTime;
 using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
 
 namespace ClosedServices_Admin.Components.Pages.Services
@@ -79,8 +80,9 @@ namespace ClosedServices_Admin.Components.Pages.Services
                 }
 
                 var now = SystemClock.Instance.GetCurrentInstant();
-                var candidateClosure = await serviceStatusService.GetCurrentOrNextStatusUpdate(ServiceId, now);
-                if (candidateClosure is null || candidateClosure.Id != StatusUpdateId)
+                var candidateClosures = await serviceStatusService.GetCurrentAndUpcomingStatusUpdates(ServiceId, now);
+                var candidateClosure = candidateClosures.FirstOrDefault(closure => closure.Id == StatusUpdateId);
+                if (candidateClosure is null)
                 {
                     navigationManager.NavigateTo("not-found");
                     return;

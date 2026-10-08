@@ -22,8 +22,21 @@ else if (Service is not null)
     @if (RemovableClosure is not null)
     {
         <GdsNotificationBanner BannerTitle="Current/Upcoming closure">
-            <p>@ClosureStatusText</p>
-            <GdsLink Href="@RemovalConfirmationLink">Remove this closure</GdsLink>
+            @ClosureStatusText. <GdsLink Href="@RemovalConfirmationLink">Remove this closure</GdsLink>.
+
+            @if (AdditionalUpcomingClosures.Count > 0)
+            {
+                <p>Additional upcoming closures</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    @foreach (var additionalClosure in AdditionalUpcomingClosures)
+                    {
+                        <li>
+                            @FormatClosureState(additionalClosure.Closure.ClosureState) from @FormatClosureDate(additionalClosure.Closure.EffectiveFrom).
+                            <GdsLink Href="@additionalClosure.RemovalLink"><span aria-hidden="true">Remove</span><span class="govuk-visually-hidden"> @additionalClosure.RemovalLinkAccessibleText</span></GdsLink>
+                        </li>
+                    }
+                </ul>
+            }
         </GdsNotificationBanner>
     }
     else

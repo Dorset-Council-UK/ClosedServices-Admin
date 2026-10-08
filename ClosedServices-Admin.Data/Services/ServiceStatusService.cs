@@ -111,6 +111,12 @@ namespace ClosedServices_Admin.Data.Services
 
         public async Task<ServiceStatusUpdateSummary?> GetCurrentOrNextStatusUpdate(Guid serviceId, Instant now, CancellationToken ct = default)
         {
+            var currentAndUpcomingUpdates = await GetCurrentAndUpcomingStatusUpdates(serviceId, now, ct).ConfigureAwait(false);
+            return currentAndUpcomingUpdates.FirstOrDefault();
+        }
+
+        public async Task<IReadOnlyCollection<ServiceStatusUpdateSummary>> GetCurrentAndUpcomingStatusUpdates(Guid serviceId, Instant now, CancellationToken ct = default)
+        {
             await using var context = await contextFactory.CreateDbContextAsync(ct);
 
             var updates = await context.ServiceStatusUpdates
@@ -121,16 +127,16 @@ namespace ClosedServices_Admin.Data.Services
                 .ConfigureAwait(false);
 
             var currentUpdate = ResolveCurrentUpdate(updates, now);
-
-            if (currentUpdate is not null)
-            {
-                return ToStatusUpdateSummary(currentUpdate, true);
-            }
-
-            var nextUpdate = ResolveUpcomingStatusUpdates(updates, now).FirstOrDefault();
-            return nextUpdate is null
+            var currentSummary = currentUpdate is null
                 ? null
-                : ToStatusUpdateSummary(nextUpdate, false);
+                : ToStatusUpdateSummary(currentUpdate, true);
+
+            var upcomingSummaries = ResolveUpcomingStatusUpdates(updates, now)
+                .Select(update => ToStatusUpdateSummary(update, false));
+
+            return currentSummary is null
+                ? [.. upcomingSummaries]
+                : [currentSummary, .. upcomingSummaries];
         }
 
         public async Task<bool> DeleteStatusUpdate(Guid serviceId, Guid statusUpdateId, CancellationToken ct = default)

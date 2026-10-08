@@ -91,5 +91,10 @@ namespace ClosedServices_Admin.Components.Pages.Services
                 _ => GdsTagColour.Green,
             };
         }
+
+        private static bool ShouldShowUpcomingTag(ServiceStatusOverview serviceOverview)
+        {
+            return serviceOverview.UpcomingStatuses.Count > 0;
+        }
     }
 }

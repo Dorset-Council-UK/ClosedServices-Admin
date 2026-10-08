@@ -27,6 +27,12 @@ else
                 <GdsTaskListItem Text="@serviceOverview.Service.Name" Href="@link">
                     <Status>
                         <GdsTag Text="@GetStatusText(serviceOverview.CurrentStatus.ClosureState)" Colour="@GetStatusTagColour(serviceOverview.CurrentStatus.ClosureState)" />
+                        @if (ShouldShowUpcomingTag(serviceOverview))
+                        {
+                            <span class="govuk-!-margin-left-1">
+                                <GdsTag Text="Upcoming closure" Colour="@GdsTagColour.Blue" />
+                            </span>
+                        }
                     </Status>
                 </GdsTaskListItem>
             }

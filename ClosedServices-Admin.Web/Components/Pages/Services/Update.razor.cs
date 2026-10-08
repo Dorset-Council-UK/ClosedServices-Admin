@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.WebUtilities;
 using NodaTime;
 using System.Security.Claims;
+using System.Linq;
 
 namespace ClosedServices_Admin.Components.Pages.Services
 {
@@ -46,6 +47,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
         private bool ShowTodayAndNextOption { get; set; }
         private bool ShowTomorrowOption { get; set; }
         private ServiceStatusUpdateSummary? RemovableClosure { get; set; }
+        private IReadOnlyCollection<UpcomingClosureDisplayItem> AdditionalUpcomingClosures { get; set; } = [];
         private bool ShowRemovalSuccessMessage { get; set; }
         private string? SaveErrorMessage { get; set; }
         private bool isSaving;
@@ -59,6 +61,8 @@ namespace ClosedServices_Admin.Components.Pages.Services
             : RemovableClosure.IsCurrent
                 ? $"This {ServiceTypeDisplayName.Singularize().ToLowerInvariant()} is currently {FormatClosureState(RemovableClosure.ClosureState)}"
                 : $"This {ServiceTypeDisplayName.Singularize().ToLowerInvariant()} has an upcoming closure on {FormatClosureDate(RemovableClosure.EffectiveFrom)}";
+
+        private string ServiceTypeSingularLower => ServiceTypeDisplayName.Singularize().ToLowerInvariant();
 
         protected override void OnInitialized()
         {
@@ -113,7 +117,17 @@ namespace ClosedServices_Admin.Components.Pages.Services
                     : OperatingHoursEvaluation.NextOperatingPeriod?.OpenInstant ?? now;
 
                 CurrentStatus = await serviceStatusService.GetCurrentStatus(ServiceId, statusInstant);
-                RemovableClosure = await serviceStatusService.GetCurrentOrNextStatusUpdate(ServiceId, now);
+
+                var currentAndUpcomingClosures = await serviceStatusService.GetCurrentAndUpcomingStatusUpdates(ServiceId, now);
+                RemovableClosure = currentAndUpcomingClosures.FirstOrDefault();
+                AdditionalUpcomingClosures = currentAndUpcomingClosures
+                    .Where(closure => !closure.IsCurrent && closure.Id != RemovableClosure?.Id)
+                    .Select(closure => new UpcomingClosureDisplayItem(
+                        closure,
+                        $"services/{ServiceTypeRoute}/update/{ServiceId}/remove-closure/{closure.Id}",
+                        $"Remove {FormatClosureState(closure.ClosureState)} closure on {FormatClosureDate(closure.EffectiveFrom)} for this {ServiceTypeSingularLower}"))
+                    .ToArray();
+
                 ClosureReasons = await serviceStatusService.GetClosureReasons();
             }
             catch (Exception ex)
@@ -262,6 +276,11 @@ namespace ClosedServices_Admin.Components.Pages.Services
             var localDateTime = closureDate.AtMidnight();
             return localDateTime.ToString("dddd d MMMM yyyy", null);
         }
+
+        private sealed record UpcomingClosureDisplayItem(
+            ServiceStatusUpdateSummary Closure,
+            string RemovalLink,
+            string RemovalLinkAccessibleText);
 
         private bool IsRemovalSuccessMessageRequested()
         {
