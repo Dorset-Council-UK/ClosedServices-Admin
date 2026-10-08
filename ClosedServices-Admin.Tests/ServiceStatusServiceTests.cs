@@ -13,6 +13,208 @@ namespace ClosedServices_Admin.Tests;
 public class ServiceStatusServiceTests
 {
     [Fact]
+    public async Task GetCurrentAndUpcomingStatusUpdates_ReturnsCurrentThenUpcomingInResolvedOrder()
+    {
+        var serviceId = Guid.NewGuid();
+        var now = Instant.FromUtc(2026, 1, 15, 12, 0);
+        var currentId = Guid.NewGuid();
+        var upcomingEarlierId = Guid.NewGuid();
+        var upcomingSameStartOlderId = Guid.NewGuid();
+        var upcomingSameStartNewerId = Guid.NewGuid();
+
+        await using var contextFactory = CreateContextFactory();
+        await SeedAsync(contextFactory, serviceId,
+            new ServiceStatusUpdate
+            {
+                Id = Guid.NewGuid(),
+                ServiceId = serviceId,
+                ClosureState = ClosureState.PartiallyClosed,
+                EffectiveFrom = now.Minus(Duration.FromHours(2)),
+                EffectiveTo = now.Plus(Duration.FromHours(2)),
+                UpdatedAt = now.Minus(Duration.FromMinutes(20)),
+                UpdatedByExternalUserId = "test-user"
+            },
+            new ServiceStatusUpdate
+            {
+                Id = currentId,
+                ServiceId = serviceId,
+                ClosureState = ClosureState.Closed,
+                EffectiveFrom = now.Minus(Duration.FromHours(1)),
+                EffectiveTo = now.Plus(Duration.FromHours(1)),
+                UpdatedAt = now.Minus(Duration.FromMinutes(10)),
+                UpdatedByExternalUserId = "test-user"
+            },
+            new ServiceStatusUpdate
+            {
+                Id = upcomingEarlierId,
+                ServiceId = serviceId,
+                ClosureState = ClosureState.PartiallyClosed,
+                EffectiveFrom = now.Plus(Duration.FromHours(2)),
+                EffectiveTo = now.Plus(Duration.FromHours(3)),
+                UpdatedAt = now.Minus(Duration.FromMinutes(30)),
+                UpdatedByExternalUserId = "test-user"
+            },
+            new ServiceStatusUpdate
+            {
+                Id = upcomingSameStartOlderId,
+                ServiceId = serviceId,
+                ClosureState = ClosureState.Closed,
+                EffectiveFrom = now.Plus(Duration.FromHours(5)),
+                EffectiveTo = now.Plus(Duration.FromHours(6)),
+                UpdatedAt = now.Minus(Duration.FromMinutes(15)),
+                UpdatedByExternalUserId = "test-user"
+            },
+            new ServiceStatusUpdate
+            {
+                Id = upcomingSameStartNewerId,
+                ServiceId = serviceId,
+                ClosureState = ClosureState.Closed,
+                EffectiveFrom = now.Plus(Duration.FromHours(5)),
+                EffectiveTo = now.Plus(Duration.FromHours(7)),
+                UpdatedAt = now.Minus(Duration.FromMinutes(5)),
+                UpdatedByExternalUserId = "test-user"
+            });
+
+        var sut = CreateSut(contextFactory);
+
+        var result = await sut.GetCurrentAndUpcomingStatusUpdates(serviceId, now);
+
+        Assert.Equal(4, result.Count);
+        Assert.Equal(currentId, result.ElementAt(0).Id);
+        Assert.True(result.ElementAt(0).IsCurrent);
+        Assert.Equal(upcomingEarlierId, result.ElementAt(1).Id);
+        Assert.False(result.ElementAt(1).IsCurrent);
+        Assert.Equal(upcomingSameStartNewerId, result.ElementAt(2).Id);
+        Assert.Equal(upcomingSameStartOlderId, result.ElementAt(3).Id);
+    }
+
+    [Fact]
+    public async Task GetCurrentAndUpcomingStatusUpdates_ReturnsFutureOnlyInOrder_WhenNoCurrentExists()
+    {
+        var serviceId = Guid.NewGuid();
+        var now = Instant.FromUtc(2026, 1, 15, 12, 0);
+        var nearestUpcomingId = Guid.NewGuid();
+        var sameStartOlderId = Guid.NewGuid();
+        var sameStartNewerId = Guid.NewGuid();
+
+        await using var contextFactory = CreateContextFactory();
+        await SeedAsync(contextFactory, serviceId,
+            new ServiceStatusUpdate
+            {
+                Id = sameStartOlderId,
+                ServiceId = serviceId,
+                ClosureState = ClosureState.PartiallyClosed,
+                EffectiveFrom = now.Plus(Duration.FromHours(5)),
+                EffectiveTo = now.Plus(Duration.FromHours(6)),
+                UpdatedAt = now.Minus(Duration.FromMinutes(15)),
+                UpdatedByExternalUserId = "test-user"
+            },
+            new ServiceStatusUpdate
+            {
+                Id = sameStartNewerId,
+                ServiceId = serviceId,
+                ClosureState = ClosureState.Closed,
+                EffectiveFrom = now.Plus(Duration.FromHours(5)),
+                EffectiveTo = now.Plus(Duration.FromHours(7)),
+                UpdatedAt = now.Minus(Duration.FromMinutes(5)),
+                UpdatedByExternalUserId = "test-user"
+            },
+            new ServiceStatusUpdate
+            {
+                Id = nearestUpcomingId,
+                ServiceId = serviceId,
+                ClosureState = ClosureState.Closed,
+                EffectiveFrom = now.Plus(Duration.FromHours(1)),
+                EffectiveTo = now.Plus(Duration.FromHours(2)),
+                UpdatedByExternalUserId = "test-user"
+            });
+
+        var sut = CreateSut(contextFactory);
+
+        var result = await sut.GetCurrentAndUpcomingStatusUpdates(serviceId, now);
+
+        Assert.Equal(3, result.Count);
+        Assert.All(result, item => Assert.False(item.IsCurrent));
+        Assert.Equal(nearestUpcomingId, result.ElementAt(0).Id);
+        Assert.Equal(sameStartNewerId, result.ElementAt(1).Id);
+        Assert.Equal(sameStartOlderId, result.ElementAt(2).Id);
+    }
+
+    [Fact]
+    public async Task GetCurrentAndUpcomingStatusUpdates_ReturnsEmpty_WhenNoActiveOrUpcomingUpdatesExist()
+    {
+        var serviceId = Guid.NewGuid();
+        var now = Instant.FromUtc(2026, 1, 15, 12, 0);
+
+        await using var contextFactory = CreateContextFactory();
+        await SeedAsync(contextFactory, serviceId,
+            new ServiceStatusUpdate
+            {
+                Id = Guid.NewGuid(),
+                ServiceId = serviceId,
+                ClosureState = ClosureState.Closed,
+                EffectiveFrom = now.Minus(Duration.FromHours(5)),
+                EffectiveTo = now,
+                UpdatedByExternalUserId = "test-user"
+            });
+
+        var sut = CreateSut(contextFactory);
+
+        var result = await sut.GetCurrentAndUpcomingStatusUpdates(serviceId, now);
+
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task GetCurrentAndUpcomingStatusUpdates_IncludesStartBoundaryAsCurrent_AndExcludesEndBoundary()
+    {
+        var serviceId = Guid.NewGuid();
+        var now = Instant.FromUtc(2026, 1, 15, 12, 0);
+        var currentAtBoundaryId = Guid.NewGuid();
+        var upcomingId = Guid.NewGuid();
+
+        await using var contextFactory = CreateContextFactory();
+        await SeedAsync(contextFactory, serviceId,
+            new ServiceStatusUpdate
+            {
+                Id = Guid.NewGuid(),
+                ServiceId = serviceId,
+                ClosureState = ClosureState.Closed,
+                EffectiveFrom = now.Minus(Duration.FromHours(1)),
+                EffectiveTo = now,
+                UpdatedByExternalUserId = "test-user"
+            },
+            new ServiceStatusUpdate
+            {
+                Id = currentAtBoundaryId,
+                ServiceId = serviceId,
+                ClosureState = ClosureState.PartiallyClosed,
+                EffectiveFrom = now,
+                EffectiveTo = now.Plus(Duration.FromHours(1)),
+                UpdatedByExternalUserId = "test-user"
+            },
+            new ServiceStatusUpdate
+            {
+                Id = upcomingId,
+                ServiceId = serviceId,
+                ClosureState = ClosureState.Closed,
+                EffectiveFrom = now.Plus(Duration.FromHours(2)),
+                EffectiveTo = now.Plus(Duration.FromHours(3)),
+                UpdatedByExternalUserId = "test-user"
+            });
+
+        var sut = CreateSut(contextFactory);
+
+        var result = await sut.GetCurrentAndUpcomingStatusUpdates(serviceId, now);
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal(currentAtBoundaryId, result.ElementAt(0).Id);
+        Assert.True(result.ElementAt(0).IsCurrent);
+        Assert.Equal(upcomingId, result.ElementAt(1).Id);
+        Assert.False(result.ElementAt(1).IsCurrent);
+    }
+
+    [Fact]
     public async Task GetCurrentOrNextStatusUpdate_ReturnsCurrent_WhenCurrentExists()
     {
         var serviceId = Guid.NewGuid();
@@ -346,6 +548,58 @@ public class ServiceStatusServiceTests
 
         Assert.DoesNotContain(updateId, remainingIds);
         Assert.Contains(otherUpdateId, remainingIds);
+    }
+
+    [Fact]
+    public async Task DeleteStatusUpdate_RemovingLaterUpcomingClosure_LeavesCurrentAndOtherUpcomingIntact()
+    {
+        var serviceId = Guid.NewGuid();
+        var now = Instant.FromUtc(2026, 1, 15, 12, 0);
+        var currentId = Guid.NewGuid();
+        var firstUpcomingId = Guid.NewGuid();
+        var laterUpcomingId = Guid.NewGuid();
+
+        await using var contextFactory = CreateContextFactory();
+        await SeedAsync(contextFactory, serviceId,
+            new ServiceStatusUpdate
+            {
+                Id = currentId,
+                ServiceId = serviceId,
+                ClosureState = ClosureState.Closed,
+                EffectiveFrom = now.Minus(Duration.FromHours(1)),
+                EffectiveTo = now.Plus(Duration.FromHours(1)),
+                UpdatedByExternalUserId = "test-user"
+            },
+            new ServiceStatusUpdate
+            {
+                Id = firstUpcomingId,
+                ServiceId = serviceId,
+                ClosureState = ClosureState.PartiallyClosed,
+                EffectiveFrom = now.Plus(Duration.FromHours(2)),
+                EffectiveTo = now.Plus(Duration.FromHours(3)),
+                UpdatedByExternalUserId = "test-user"
+            },
+            new ServiceStatusUpdate
+            {
+                Id = laterUpcomingId,
+                ServiceId = serviceId,
+                ClosureState = ClosureState.Closed,
+                EffectiveFrom = now.Plus(Duration.FromHours(4)),
+                EffectiveTo = now.Plus(Duration.FromHours(5)),
+                UpdatedByExternalUserId = "test-user"
+            });
+
+        var sut = CreateSut(contextFactory);
+
+        var deleted = await sut.DeleteStatusUpdate(serviceId, laterUpcomingId);
+
+        Assert.True(deleted);
+
+        var remaining = await sut.GetCurrentAndUpcomingStatusUpdates(serviceId, now);
+        Assert.Equal(2, remaining.Count);
+        Assert.Equal(currentId, remaining.ElementAt(0).Id);
+        Assert.True(remaining.ElementAt(0).IsCurrent);
+        Assert.Equal(firstUpcomingId, remaining.ElementAt(1).Id);
     }
 
     private static ServiceStatusService CreateSut(IDbContextFactory<ApplicationDbContext> contextFactory)

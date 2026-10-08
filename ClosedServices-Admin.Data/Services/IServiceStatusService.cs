@@ -9,6 +9,7 @@ namespace ClosedServices_Admin.Data.Services
         Task<ServiceCurrentStatus> GetCurrentStatus(Guid serviceId, Instant now, CancellationToken ct = default);
         Task<IReadOnlyCollection<ServiceStatusOverview>> GetStatusOverviews(IReadOnlyCollection<Guid> serviceIds, Instant now, CancellationToken ct = default);
         Task<ServiceStatusUpdateSummary?> GetCurrentOrNextStatusUpdate(Guid serviceId, Instant now, CancellationToken ct = default);
+        Task<IReadOnlyCollection<ServiceStatusUpdateSummary>> GetCurrentAndUpcomingStatusUpdates(Guid serviceId, Instant now, CancellationToken ct = default);
         Task CreateStatusUpdate(ServiceStatusUpdateCommand command, CancellationToken ct = default);
         Task<bool> DeleteStatusUpdate(Guid serviceId, Guid statusUpdateId, CancellationToken ct = default);
         Task<IReadOnlyCollection<ClosureReason>> GetClosureReasons(CancellationToken ct = default);
