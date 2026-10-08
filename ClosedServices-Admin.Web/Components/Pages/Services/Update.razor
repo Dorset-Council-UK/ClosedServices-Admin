@@ -32,7 +32,7 @@ else if (Service is not null)
                     {
                         <li>
                             @FormatClosureState(additionalClosure.Closure.ClosureState) from @FormatClosureDate(additionalClosure.Closure.EffectiveFrom).
-                            <GdsLink Href="@additionalClosure.RemovalLink">Remove<span class="govuk-visually-hidden"> @additionalClosure.RemovalLinkAccessibleText</span></GdsLink>
+                            <GdsLink Href="@additionalClosure.RemovalLink"><span aria-hidden="true">Remove</span><span class="govuk-visually-hidden"> @additionalClosure.RemovalLinkAccessibleText</span></GdsLink>
                         </li>
                     }
                 </ul>
