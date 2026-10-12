@@ -42,7 +42,7 @@ else if (Service is not null)
     else
     {
         <GdsInsetText>
-            <strong>This @Service.ServiceType.ToString().Singularize().ToLowerInvariant() has no current or planned closures</strong>
+            <strong>This @Service.ServiceType!.Name.Singularize().ToLowerInvariant() has no current or planned closures</strong>
         </GdsInsetText>
     }
 

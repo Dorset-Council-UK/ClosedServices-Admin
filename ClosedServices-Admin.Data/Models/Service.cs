@@ -1,5 +1,4 @@
-﻿using ClosedServices_Admin.Data.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using NetTopologySuite.Geometries;
 
 namespace ClosedServices_Admin.Data.Models
@@ -15,8 +14,8 @@ namespace ClosedServices_Admin.Data.Models
         [MaxLength(200)]
         public string Name { get; set; } = string.Empty;
 
-        public ServiceType ServiceType { get; set; }
-
+        public ServiceType? ServiceType { get; set; }
+        public Guid ServiceTypeId { get; set; }
         [MaxLength(500)]
         public string? ShortDescription { get; set; }
 

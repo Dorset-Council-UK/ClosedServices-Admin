@@ -26,7 +26,7 @@
                 <p>You have permission to update the following services.</p>
 
                 <GdsContainer>
-                    @foreach (var group in Services.GroupBy(s => s.ServiceType).Chunk(3))
+                    @foreach (var group in Services.GroupBy(s => s.ServiceType!.Name).Chunk(3))
                     {
                         <GdsGridRow>
                             @foreach (var service in group)

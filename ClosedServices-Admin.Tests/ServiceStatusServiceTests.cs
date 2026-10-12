@@ -327,12 +327,13 @@ public class ServiceStatusServiceTests
         await using var contextFactory = CreateContextFactory();
         await using (var context = await contextFactory.CreateDbContextAsync())
         {
+            context.ServiceTypes.Add(CreateLibrariesType());
             context.Services.AddRange(
                 new Service
                 {
                     Id = serviceId,
                     Name = "Service with updates",
-                    ServiceType = ServiceType.Libraries,
+                    ServiceTypeId = LibrariesTypeId,
                     IsActive = true,
                     OperatingDays =
                     [
@@ -350,7 +351,7 @@ public class ServiceStatusServiceTests
                 {
                     Id = serviceWithoutUpdatesId,
                     Name = "Service without updates",
-                    ServiceType = ServiceType.Libraries,
+                    ServiceTypeId = LibrariesTypeId,
                     IsActive = true,
                     OperatingDays =
                     [
@@ -476,19 +477,20 @@ public class ServiceStatusServiceTests
         await using var contextFactory = CreateContextFactory();
         await using (var context = await contextFactory.CreateDbContextAsync())
         {
+            context.ServiceTypes.Add(CreateLibrariesType());
             context.Services.AddRange(
                 new Service
                 {
                     Id = requestedServiceId,
                     Name = "Requested",
-                    ServiceType = ServiceType.Libraries,
+                    ServiceTypeId = LibrariesTypeId,
                     IsActive = true
                 },
                 new Service
                 {
                     Id = otherServiceId,
                     Name = "Other",
-                    ServiceType = ServiceType.Libraries,
+                    ServiceTypeId = LibrariesTypeId,
                     IsActive = true
                 });
 
@@ -602,6 +604,10 @@ public class ServiceStatusServiceTests
         Assert.Equal(firstUpcomingId, remaining.ElementAt(1).Id);
     }
 
+    private static readonly Guid LibrariesTypeId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+
+    private static ServiceType CreateLibrariesType() => new() { Id = LibrariesTypeId, Name = "Libraries", Order = 2 };
+
     private static ServiceStatusService CreateSut(IDbContextFactory<ApplicationDbContext> contextFactory)
     {
         return new ServiceStatusService(contextFactory, NullLogger<ServiceStatusService>.Instance);
@@ -620,12 +626,13 @@ public class ServiceStatusServiceTests
     {
         await using var context = await contextFactory.CreateDbContextAsync();
         var knownServiceIds = new HashSet<Guid>();
+        context.ServiceTypes.Add(CreateLibrariesType());
 
         context.Services.Add(new Service
         {
             Id = serviceId,
             Name = "Test Service",
-            ServiceType = ServiceType.Libraries,
+            ServiceTypeId = LibrariesTypeId,
             IsActive = true
         });
         knownServiceIds.Add(serviceId);
@@ -638,7 +645,7 @@ public class ServiceStatusServiceTests
                 {
                     Id = update.ServiceId,
                     Name = "Other Service",
-                    ServiceType = ServiceType.Libraries,
+                    ServiceTypeId = LibrariesTypeId,
                     IsActive = true
                 });
 

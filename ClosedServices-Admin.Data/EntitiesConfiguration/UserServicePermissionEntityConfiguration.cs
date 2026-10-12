@@ -11,8 +11,9 @@ namespace ClosedServices_Admin.Data.EntitiesConfiguration
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.ExternalUserId).IsRequired().HasMaxLength(200);
-            builder.Property(x => x.ServiceType)
-                .HasColumnType("service_type");
+            builder.HasOne(x => x.ServiceType)
+                .WithMany()
+                .HasForeignKey(x => x.ServiceTypeId);
 
             builder.HasOne(x => x.Service)
                 .WithMany(x => x.Permissions)
@@ -20,7 +21,7 @@ namespace ClosedServices_Admin.Data.EntitiesConfiguration
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasIndex(x => x.ExternalUserId);
-            builder.HasIndex(x => new { x.ExternalUserId, x.ServiceType });
+            builder.HasIndex(x => new { x.ExternalUserId, x.ServiceTypeId });
             builder.HasIndex(x => new { x.ExternalUserId, x.ServiceId });
 
             var tableIdentifier = StoreObjectIdentifier.Table(
@@ -29,7 +30,7 @@ namespace ClosedServices_Admin.Data.EntitiesConfiguration
 
             var serviceIdColumn = builder.Metadata.FindProperty(nameof(UserServicePermission.ServiceId))!
                 .GetColumnName(tableIdentifier)!;
-            var serviceTypeColumn = builder.Metadata.FindProperty(nameof(UserServicePermission.ServiceType))!
+            var serviceTypeColumn = builder.Metadata.FindProperty(nameof(UserServicePermission.ServiceTypeId))!
                 .GetColumnName(tableIdentifier)!;
 
             builder.ToTable(t =>

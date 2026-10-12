@@ -89,15 +89,29 @@ public class Worker(
             },
         ];
 
+        ServiceType[] serviceTypes =
+        [
+            new()
+            {
+                Name = "Schools",
+                Order = 1,
+            },
+            new()
+            {
+                Name = "Libraries",
+                Order = 2,
+            },
+        ];
+
         var fakeSchool = new Faker<Service>()
             .RuleFor(x => x.Name, f => f.Company.CompanyName())
-            .RuleFor(x => x.ServiceType, f => Data.Enums.ServiceType.Schools)
+            .RuleFor(x => x.ServiceType, f => serviceTypes[0])
             .RuleFor(x => x.ShortDescription, f => f.Lorem.Sentence())
             .RuleFor(x => x.Geom, f => new NetTopologySuite.Geometries.Point(f.Random.Double(330000, 423000), f.Random.Double(67000, 423000)));
 
         var fakeLibrary = new Faker<Service>()
             .RuleFor(x => x.Name, f => f.Company.CompanyName())
-            .RuleFor(x => x.ServiceType, f => Data.Enums.ServiceType.Libraries)
+            .RuleFor(x => x.ServiceType, f => serviceTypes[1])
             .RuleFor(x => x.ShortDescription, f => f.Lorem.Sentence())
             .RuleFor(x => x.Geom, f => new NetTopologySuite.Geometries.Point(f.Random.Double(330000, 423000), f.Random.Double(67000, 423000)));
 
@@ -108,7 +122,13 @@ public class Worker(
             await using var transaction = await dbContext.Database
                 .BeginTransactionAsync(cancellationToken);
 
-            if(!await dbContext.ClosureReasons.AnyAsync(cancellationToken))
+            if (!await dbContext.ServiceTypes.AnyAsync(cancellationToken))
+            {
+                await dbContext.ServiceTypes.AddRangeAsync(serviceTypes, cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            if (!await dbContext.ClosureReasons.AnyAsync(cancellationToken))
             {
                 await dbContext.ClosureReasons.AddRangeAsync(closureReasons, cancellationToken);
                 await dbContext.SaveChangesAsync(cancellationToken);
