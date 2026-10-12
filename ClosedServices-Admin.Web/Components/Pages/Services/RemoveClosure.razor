@@ -11,7 +11,7 @@ else if (Service is not null && ClosureToRemove is not null)
     <GdsBackLink Href="@UpdatePageLink" />
     <GdsHeading Level="1">Remove closure for @Service.Name</GdsHeading>
 
-    <p>This will remove the selected closure update for this service. If there are no other planned closures, your @Service.ServiceType.ToString().Singularize().ToLowerInvariant() will show as 'No disruption'</p>
+    <p>This will remove the selected closure update for this service. If there are no other planned closures, your @Service.ServiceType!.Name.Singularize().ToLowerInvariant() will show as 'No disruption'</p>
 
     <dl class="govuk-summary-list">
         <div class="govuk-summary-list__row">

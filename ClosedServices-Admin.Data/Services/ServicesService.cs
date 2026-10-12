@@ -18,11 +18,26 @@ namespace ClosedServices_Admin.Data.Services
                 .ConfigureAwait(false);
         }
 
+        public async Task<ServiceType?> GetServiceTypeByName(string name, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
+            var normalised = name.Trim().ToLower();
+            await using var context = await contextFactory.CreateDbContextAsync(ct);
+            return await context.ServiceTypes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Name.ToLower() == normalised, ct)
+                .ConfigureAwait(false);
+        }
+
         public async Task<IReadOnlyCollection<Service>> GetServicesByType(ServiceType serviceType, CancellationToken ct = default)
         {
             await using var context = await contextFactory.CreateDbContextAsync(ct);
             return await context.Services
-                .Where(s => s.ServiceType == serviceType)
+                .Where(s => s.ServiceTypeId == serviceType.Id)
                 .AsNoTracking()
                 .ToListAsync(ct)
                 .ConfigureAwait(false);
@@ -66,14 +81,15 @@ namespace ClosedServices_Admin.Data.Services
                 .ToHashSet();
 
             var serviceTypes = permissions
-                .Where(permission => permission.ServiceType.HasValue)
-                .Select(permission => permission.ServiceType!.Value)
+                .Where(permission => permission.ServiceTypeId.HasValue)
+                .Select(permission => permission.ServiceTypeId!.Value)
                 .ToHashSet();
 
             return await context.Services
                 .Include(service => service.OperatingDays)
+                .Include(s => s.ServiceType)
                 .AsNoTracking()
-                .Where(service => serviceIds.Contains(service.Id) || serviceTypes.Contains(service.ServiceType))
+                .Where(service => serviceIds.Contains(service.Id) || serviceTypes.Contains(service.ServiceTypeId))
                 .ToListAsync(ct)
                 .ConfigureAwait(false);
         }
@@ -81,7 +97,7 @@ namespace ClosedServices_Admin.Data.Services
         public async Task<IReadOnlyCollection<Service>> GetServicesForUserByType(string userId, ServiceType serviceType, CancellationToken ct = default)
         {
             var allServices = await GetServicesForUser(userId, ct);
-            return [.. allServices.Where(service => service.ServiceType == serviceType)];
+            return [.. allServices.Where(service => service.ServiceTypeId == serviceType.Id)];
         }
 
     }

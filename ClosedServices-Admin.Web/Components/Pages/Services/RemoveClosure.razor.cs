@@ -50,10 +50,8 @@ namespace ClosedServices_Admin.Components.Pages.Services
             isLoading = true;
             try
             {
-                if (string.IsNullOrWhiteSpace(ServiceTypeRoute)
-                    || int.TryParse(ServiceTypeRoute, out _)
-                    || !Enum.TryParse<ServiceType>(ServiceTypeRoute, ignoreCase: true, out var parsedServiceType)
-                    || !Enum.IsDefined(parsedServiceType))
+                var parsedServiceType = await servicesService.GetServiceTypeByName(ServiceTypeRoute);
+                if (parsedServiceType is null)
                 {
                     navigationManager.NavigateTo("not-found");
                     return;

@@ -12,9 +12,10 @@ namespace ClosedServices_Admin.Data.EntitiesConfiguration
             builder.Property(s => s.ShortDescription).HasMaxLength(500);
             builder.Property(s => s.Address).HasMaxLength(1000);
             builder.Property(s => s.Postcode).HasMaxLength(20);
-            builder.Property(s => s.ServiceType)
-                .IsRequired()
-                .HasColumnType("service_type");
+            builder.HasOne(s => s.ServiceType)
+                .WithMany()
+                .HasForeignKey(s => s.ServiceTypeId)
+                .IsRequired();
             builder.Property(s => s.IsActive).IsRequired();
 
         }

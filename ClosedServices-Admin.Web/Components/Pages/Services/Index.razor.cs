@@ -1,4 +1,5 @@
 using ClosedServices_Admin.Data.Enums;
+using ClosedServices_Admin.Data.Models;
 using ClosedServices_Admin.Data.Services;
 using GdsBlazorComponents;
 using Microsoft.AspNetCore.Components;
@@ -21,7 +22,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
 
         private ServiceType? ParsedServiceType { get; set; }
 
-        private string ServiceTypeDisplayName => ParsedServiceType?.ToString() ?? ServiceTypeRoute;
+        private string ServiceTypeDisplayName => ParsedServiceType?.Name ?? ServiceTypeRoute;
 
         private IReadOnlyCollection<ServiceStatusOverview> ServiceOverviews { get; set; } = [];
 
@@ -34,10 +35,8 @@ namespace ClosedServices_Admin.Components.Pages.Services
             {
 
 
-                if (string.IsNullOrWhiteSpace(ServiceTypeRoute)
-                    || int.TryParse(ServiceTypeRoute, out _)
-                    || !Enum.TryParse<ServiceType>(ServiceTypeRoute, ignoreCase: true, out var parsedServiceType)
-                    || !Enum.IsDefined(parsedServiceType))
+                var parsedServiceType = await servicesService.GetServiceTypeByName(ServiceTypeRoute);
+                if (parsedServiceType is null)
                 {
                     navigationManager.NavigateTo("not-found");
                     return;

@@ -158,7 +158,7 @@ namespace ClosedServices_Admin.Data.Services
             return true;
         }
 
-        public async Task<IReadOnlyCollection<ClosureReason>> GetClosureReasons(CancellationToken ct)
+        public async Task<IReadOnlyCollection<ClosureReason>> GetClosureReasons(CancellationToken ct = default)
         {
             await using var context = await contextFactory.CreateDbContextAsync(ct);
 

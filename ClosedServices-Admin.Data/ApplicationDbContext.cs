@@ -14,14 +14,13 @@ namespace ClosedServices_Admin.Data
         public DbSet<ServiceStatusUpdate> ServiceStatusUpdates { get; set; }
         public DbSet<UserServicePermission> UserServicePermissions { get; set; }
         public DbSet<ClosureReason> ClosureReasons { get; set; }
+        public DbSet<ServiceType> ServiceTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             var schema = string.IsNullOrWhiteSpace(databaseOptions.Value.Schema)
                 ? null
                 : databaseOptions.Value.Schema;
-
-            modelBuilder.HasPostgresEnum<ServiceType>(schema, "service_type");
 
             if (!string.IsNullOrWhiteSpace(databaseOptions.Value.Schema))
             {

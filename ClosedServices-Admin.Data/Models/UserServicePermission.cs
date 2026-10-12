@@ -10,6 +10,7 @@ namespace ClosedServices_Admin.Data.Models
         [MaxLength(200)]
         public string ExternalUserId { get; set; } = string.Empty;
         public Guid? ServiceId { get; set; }
+        public Guid? ServiceTypeId { get; set; }
         public Service? Service { get; set; }
         public ServiceType? ServiceType { get; set; }
     }

@@ -154,7 +154,6 @@ internal static class WebApplicationBuilderExtension
             options.UseNpgsql(connectionString, x =>
             {
                 x.MigrationsHistoryTable("__EFMigrationsHistory", databaseOptions?.Schema);
-                x.MapEnum<ServiceType>("service_type", databaseOptions?.Schema);
                 x.UseNodaTime();
                 x.UseNetTopologySuite();
                 x.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);

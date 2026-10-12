@@ -22,7 +22,7 @@ else
         <GdsTaskList>
             @foreach (var serviceOverview in ServiceOverviews.OrderBy(overview => overview.Service.Name))
             {
-                string link = $"services/{ParsedServiceType}/update/{serviceOverview.Service.Id}";
+                string link = $"services/{ParsedServiceType!.Name.ToLowerInvariant()}/update/{serviceOverview.Service.Id}";
 
                 <GdsTaskListItem Text="@serviceOverview.Service.Name" Href="@link">
                     <Status>
