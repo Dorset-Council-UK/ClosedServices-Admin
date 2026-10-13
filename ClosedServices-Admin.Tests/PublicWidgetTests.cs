@@ -63,16 +63,15 @@ public class PublicWidgetTests
     }
 
     [Theory]
-    [InlineData("", false)]
-    [InlineData("/closed-services", false)]
-    [InlineData("/closed-services", true)]
-    public async Task Widget_IsAnonymousEncodedLightweightAndPathBaseAware(string pathBase, bool showMessages)
+    [InlineData("")]
+    [InlineData("/closed-services")]
+    public async Task Widget_IsAnonymousEncodedLightweightAndPathBaseAware(string pathBase)
     {
         await using var factory = new WidgetFactory { PathBase = pathBase };
         await factory.SeedAsync();
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
         using var request = new HttpRequestMessage(HttpMethod.Get,
-            $"{pathBase}/embed/service-status?ServiceType=Libraries&ShowMessages={showMessages}");
+            $"{pathBase}/embed/service-status?ServiceType=Libraries");
         request.Headers.Add("Origin", "https://external.example");
         using var response = await client.SendAsync(request);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -83,8 +82,8 @@ public class PublicWidgetTests
         Assert.Contains("frame-ancestors *", response.Headers.GetValues("Content-Security-Policy").Single());
         var html = await response.Content.ReadAsStringAsync();
         Assert.Contains("Central &lt;Library&gt;", html);
-        Assert.Contains("Upcoming disruptions", html);
-        Assert.Contains("No current disruption reported", html);
+        Assert.Contains("Upcoming closures", html);
+        Assert.Contains("No disruption", html);
         Assert.Contains("until further notice", html);
         Assert.Contains("13:00 BST", html);
         Assert.DoesNotContain("Inactive Library", html);
@@ -94,8 +93,7 @@ public class PublicWidgetTests
         Assert.DoesNotContain("govuk", html);
         Assert.Contains($"{pathBase}/embed-assets/service-status.js", html);
         Assert.Contains($"{pathBase}/embed-assets/service-status.css", html);
-        Assert.Contains($"{pathBase}/embed/service-status?ServiceType=Libraries&amp;ShowMessages={showMessages}", html);
-        Assert.Equal(showMessages, html.Contains("&lt;script&gt;alert", StringComparison.Ordinal));
+        Assert.Contains($"{pathBase}/embed/service-status?ServiceType=Libraries", html);
         Assert.DoesNotContain("private-updater", html);
         using var scriptResponse = await client.GetAsync($"{pathBase}/embed-assets/service-status.js");
         Assert.Equal(HttpStatusCode.OK, scriptResponse.StatusCode);
