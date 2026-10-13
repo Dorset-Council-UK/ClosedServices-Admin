@@ -8,7 +8,7 @@ const script = fs.readFileSync(path.join(__dirname,
     "../ClosedServices-Admin.Web/wwwroot/embed-assets/service-status.js"), "utf8");
 
 test("refresh waits one minute and reloads only the unchanged iframe URL", () => {
-    const originalUrl = "https://widget.example/closed-services/embed/service-status?ServiceType=Libraries&ShowMessages=true";
+    const originalUrl = "https://widget.example/closed-services/embed/service-status?ServiceType=Libraries";
     let scheduledCallback;
     let delay;
     let reloads = 0;

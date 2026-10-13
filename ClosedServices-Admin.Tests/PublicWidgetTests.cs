@@ -107,7 +107,6 @@ public class PublicWidgetTests
     [Theory]
     [InlineData("", HttpStatusCode.BadRequest)]
     [InlineData("?ServiceID=invalid", HttpStatusCode.BadRequest)]
-    [InlineData("?ServiceType=Libraries&ShowMessages=invalid", HttpStatusCode.BadRequest)]
     [InlineData("?ServiceType=missing", HttpStatusCode.NotFound)]
     [InlineData("?ServiceType=Libraries&ServiceID=dddddddd-dddd-dddd-dddd-dddddddddddd", HttpStatusCode.NotFound)]
     [InlineData("?ServiceType=Empty%20type", HttpStatusCode.OK)]

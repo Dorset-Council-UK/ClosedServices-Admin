@@ -1,13 +1,12 @@
 namespace ClosedServices_Admin.Data.PublicStatus;
 
-public sealed record PublicStatusRequest(PublicStatusFilter Filter, bool ShowMessages)
+public sealed record PublicStatusRequest(PublicStatusFilter Filter)
 {
     public static bool TryParse(
         IEnumerable<KeyValuePair<string, string[]>> parameters,
         out PublicStatusRequest? request,
         out string? error,
-        string? serviceIdFromPath = null,
-        bool parseShowMessages = false)
+        string? serviceIdFromPath = null)
     {
         request = null;
         error = null;
@@ -18,9 +17,7 @@ public sealed record PublicStatusRequest(PublicStatusFilter Filter, bool ShowMes
                     .Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),
                 StringComparer.OrdinalIgnoreCase);
 
-        var recognisedKeys = parseShowMessages
-            ? new[] { "ServiceType", "ServiceID", "ShowMessages" }
-            : new[] { "ServiceType", "ServiceID" };
+        var recognisedKeys = new[] { "ServiceType", "ServiceID" };
         foreach (var key in recognisedKeys)
         {
             if (values.TryGetValue(key, out var entries) && entries.Length != 1)
@@ -70,15 +67,7 @@ public sealed record PublicStatusRequest(PublicStatusFilter Filter, bool ShowMes
             return false;
         }
 
-        var showMessages = false;
-        if (parseShowMessages && values.TryGetValue("ShowMessages", out var messages)
-            && !bool.TryParse(messages[0], out showMessages))
-        {
-            error = "ShowMessages must be true or false.";
-            return false;
-        }
-
-        request = new PublicStatusRequest(new PublicStatusFilter(serviceType, serviceId), showMessages);
+        request = new PublicStatusRequest(new PublicStatusFilter(serviceType, serviceId));
         return true;
     }
 }

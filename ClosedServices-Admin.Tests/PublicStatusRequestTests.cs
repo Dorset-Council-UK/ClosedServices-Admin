@@ -11,13 +11,11 @@ public class PublicStatusRequestTests
         {
             ["servicetype"] = [" Libraries ", "LIBRARIES"],
             ["serviceid"] = [PublicStatusTestData.ServiceId.ToString()],
-            ["showmessages"] = ["TRUE"]
         };
-        Assert.True(PublicStatusRequest.TryParse(parameters, out var request, out var error, parseShowMessages: true));
+        Assert.True(PublicStatusRequest.TryParse(parameters, out var request, out var error));
         Assert.Null(error);
         Assert.Equal("Libraries", request!.Filter.ServiceType);
         Assert.Equal(PublicStatusTestData.ServiceId, request.Filter.ServiceId);
-        Assert.True(request.ShowMessages);
     }
 
     [Theory]
@@ -25,26 +23,23 @@ public class PublicStatusRequestTests
     [InlineData("ServiceID", "00000000-0000-0000-0000-000000000000")]
     [InlineData("ServiceID", "")]
     [InlineData("ServiceType", " ")]
-    [InlineData("ShowMessages", "1")]
-    [InlineData("ShowMessages", "")]
     public void InvalidValues_AreRejected(string key, string value)
     {
         var parameters = new Dictionary<string, string[]> { ["ServiceType"] = ["Libraries"] };
         parameters[key] = [value];
-        Assert.False(PublicStatusRequest.TryParse(parameters, out var request, out var error, parseShowMessages: true));
+        Assert.False(PublicStatusRequest.TryParse(parameters, out var request, out var error));
         Assert.Null(request);
         Assert.NotNull(error);
     }
 
     [Theory]
     [InlineData("ServiceType", "Libraries", "Leisure")]
-    [InlineData("ShowMessages", "true", "false")]
     [InlineData("ServiceID", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")]
     public void ConflictingDuplicates_AreRejected(string key, string first, string second)
     {
         var parameters = new Dictionary<string, string[]> { ["ServiceType"] = ["Libraries"] };
         parameters[key] = [first, second];
-        Assert.False(PublicStatusRequest.TryParse(parameters, out _, out _, parseShowMessages: true));
+        Assert.False(PublicStatusRequest.TryParse(parameters, out _, out _));
     }
 
     [Fact]
@@ -53,7 +48,6 @@ public class PublicStatusRequestTests
         Assert.False(PublicStatusRequest.TryParse(new Dictionary<string, string[]>(), out _, out _));
         Assert.True(PublicStatusRequest.TryParse(
             new Dictionary<string, string[]> { ["ServiceType"] = ["Libraries"] }, out var request, out _));
-        Assert.False(request!.ShowMessages);
     }
 
     [Fact]

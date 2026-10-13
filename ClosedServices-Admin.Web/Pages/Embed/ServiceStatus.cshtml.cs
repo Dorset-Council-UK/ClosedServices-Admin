@@ -21,7 +21,7 @@ public sealed class ServiceStatusModel(IPublicStatusService statusService) : Pag
         Response.Headers.CacheControl = "no-store";
         var parameters = Request.Query.Select(pair => new KeyValuePair<string, string[]>(
             pair.Key, pair.Value.Select(value => value ?? string.Empty).ToArray()));
-        if (!PublicStatusRequest.TryParse(parameters, out var request, out var error, parseShowMessages: true))
+        if (!PublicStatusRequest.TryParse(parameters, out var request, out var error))
         {
             Response.StatusCode = StatusCodes.Status400BadRequest;
             Error = error;
