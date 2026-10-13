@@ -1,0 +1,21 @@
+@model ClosedServices_Admin.Data.PublicStatus.PublicClosure
+@using ClosedServices_Admin.Pages.Embed
+<p>
+    From <time datetime="@ServiceStatusModel.MachineDate(Model.EffectiveFrom)">@ServiceStatusModel.FormatDate(Model.EffectiveFrom)</time>
+    @if (Model.EffectiveTo is { } end)
+    {
+        <span>until <time datetime="@ServiceStatusModel.MachineDate(end)">@ServiceStatusModel.FormatDate(end)</time>.</span>
+    }
+    else
+    {
+        <span>until further notice.</span>
+    }
+</p>
+@if (!string.IsNullOrWhiteSpace(Model.Reason))
+{
+    <p>Reason: @Model.Reason</p>
+}
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <p class="message">@Model.Message</p>
+}

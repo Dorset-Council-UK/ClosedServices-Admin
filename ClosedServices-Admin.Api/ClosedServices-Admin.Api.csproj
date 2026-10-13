@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ClosedServices_Admin.Api</RootNamespace>
+    <UserSecretsId>closedservices-admin-public-api</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="10.0.3" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="10.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ClosedServices-Admin.Data\ClosedServices-Admin.Data.csproj" />
+    <ProjectReference Include="..\ClosedServices-Admin-Shared\ClosedServices-Admin-Shared.csproj" />
+    <ProjectReference Include="..\ClosedServices-Admin.ServiceDefaults\ClosedServices-Admin.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>

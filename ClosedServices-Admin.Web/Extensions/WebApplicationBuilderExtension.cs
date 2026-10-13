@@ -30,7 +30,7 @@ internal static class WebApplicationBuilderExtension
         {
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
-                options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor;
 
                 if (networkingOptions.KnownProxies is not null)
                 {
