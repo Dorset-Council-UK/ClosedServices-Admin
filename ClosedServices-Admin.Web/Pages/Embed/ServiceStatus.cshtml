@@ -1,0 +1,59 @@
+@page "/embed/service-status"
+@model ClosedServices_Admin.Pages.Embed.ServiceStatusModel
+@using ClosedServices_Admin.Pages.Embed
+@{
+    Layout = null;
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Service status</title>
+    <link rel="stylesheet" href="@Model.AssetPath("service-status.css")" />
+    <script src="@Model.AssetPath("service-status.js")" defer></script>
+</head>
+<body>
+    <main>
+        <h1>Service status</h1>
+        @if (Model.Error is not null)
+        {
+            <p class="error" role="alert">@Model.Error</p>
+        }
+        else if (Model.Snapshot is not null)
+        {
+            @if (Model.Snapshot.Services.Count == 0)
+            {
+                <p>No active services were found for this service type.</p>
+            }
+            @foreach (var service in Model.Snapshot.Services)
+            {
+                <section class="service" aria-label="@service.Name">
+                    <h2>@service.Name</h2>
+                    <p><strong class="status status-@service.Status">@ServiceStatusModel.StatusLabel(service.Status)</strong></p>
+                    @if (service.CurrentClosure is not null)
+                    {
+                        @await Html.PartialAsync("_Closure", new ClosureDisplayModel(service.CurrentClosure, Model.ShowMessages))
+                    }
+                    @if (service.UpcomingClosures.Count > 0)
+                    {
+                        <h3>Upcoming disruptions</h3>
+                        <ul class="closures">
+                            @foreach (var closure in service.UpcomingClosures)
+                            {
+                                <li>
+                                    <p><strong>@ServiceStatusModel.StatusLabel(closure.Status)</strong></p>
+                                    @await Html.PartialAsync("_Closure", new ClosureDisplayModel(closure, Model.ShowMessages))
+                                </li>
+                            }
+                        </ul>
+                    }
+                </section>
+            }
+            <p class="updated">Last updated: <time datetime="@ServiceStatusModel.MachineDate(Model.Snapshot.GeneratedAt)">@ServiceStatusModel.FormatDate(Model.Snapshot.GeneratedAt)</time></p>
+        }
+        <p class="refresh">Updates every minute. <a href="@Model.RefreshUrl">Refresh now</a></p>
+        <noscript><p>Automatic updates require JavaScript. Use “Refresh now” to check the latest status.</p></noscript>
+    </main>
+</body>
+</html>

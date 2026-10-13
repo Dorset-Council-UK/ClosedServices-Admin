@@ -16,4 +16,9 @@ builder.AddProject<Projects.ClosedServices_Admin_Web>("closedservices-admin-web"
     .WithReference(migrations)
     .WaitForCompletion(migrations);
 
+builder.AddProject<Projects.ClosedServices_Admin_Api>("closedservices-admin-api")
+    .WithReference(postgresdb)
+    .WaitForCompletion(migrations)
+    .WithExternalHttpEndpoints();
+
 builder.Build().Run();

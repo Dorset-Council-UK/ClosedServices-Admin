@@ -1,0 +1,90 @@
+:root {
+    color-scheme: light;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #0b0c0c;
+    background: #fff;
+    line-height: 1.5;
+}
+
+body {
+    margin: 0;
+}
+
+main {
+    padding: 1rem;
+    max-width: 54rem;
+    overflow-wrap: anywhere;
+}
+
+h1, h2, h3, p {
+    margin: 0 0 .75rem;
+}
+
+h1 {
+    font-size: 1.5rem;
+}
+
+h2 {
+    font-size: 1.25rem;
+}
+
+h3 {
+    font-size: 1.1rem;
+}
+
+.service {
+    border-top: 1px solid #b1b4b6;
+    padding: 1rem 0 .5rem;
+}
+
+.service-type, .updated, .refresh {
+    font-size: .95rem;
+}
+
+.status {
+    display: inline-block;
+    padding: .2rem .5rem;
+    background: #e8f0f8;
+}
+
+.status-closed {
+    background: #f6d7d2;
+}
+
+.status-partiallyClosed {
+    background: #fff0c2;
+}
+
+.closures {
+    padding-left: 1.25rem;
+    margin: 0 0 1rem;
+}
+
+.closures li {
+    margin-bottom: 1rem;
+}
+
+.message {
+    white-space: pre-line;
+}
+
+.error {
+    border-left: 4px solid #d4351c;
+    padding-left: .75rem;
+}
+
+a {
+    color: #1d70b8;
+    text-underline-offset: .15em;
+}
+
+a:hover {
+    text-decoration-thickness: 3px;
+}
+
+a:focus-visible {
+    color: #0b0c0c;
+    background: #ffdd00;
+    outline: 3px solid #ffdd00;
+    box-shadow: 0 4px #0b0c0c;
+}
