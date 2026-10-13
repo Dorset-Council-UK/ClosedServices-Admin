@@ -68,13 +68,11 @@ if (options.UseHttpsRedirection)
 }
 
 app.UseRouting();
-app.UseAntiforgery();
-app.UseRateLimiter();
-
-app.MapStaticAssets();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseAntiforgery();
+app.UseRateLimiter();
+app.MapStaticAssets();
 app.MapRazorPages();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
