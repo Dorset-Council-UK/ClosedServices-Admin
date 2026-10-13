@@ -15,7 +15,7 @@
 </head>
 <body>
     <main>
-        <h1>Service status</h1>
+        <h1>Closed Services</h1>
         @if (Model.Error is not null)
         {
             <p class="error" role="alert">@Model.Error</p>
@@ -26,24 +26,42 @@
             {
                 <p>No active services were found for this service type.</p>
             }
-            @foreach (var service in Model.Snapshot.Services)
+            var orderedServices = Model.Snapshot.Services
+                .OrderBy(service => service.Status switch
+                {
+                    "closed" => 0,
+                    "partiallyClosed" => 1,
+                    _ when service.UpcomingClosures.Count > 0 => 2,
+                    _ => 3
+                })
+                .ThenBy(service => service.Name, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(service => service.ServiceId);
+
+            @foreach (var service in orderedServices)
             {
                 <section class="service" aria-label="@service.Name">
                     <h2>@service.Name</h2>
-                    <p><strong class="status status-@service.Status">@ServiceStatusModel.StatusLabel(service.Status)</strong></p>
+                    <p>
+                        <strong class="status status-@service.Status">@ServiceStatusModel.StatusLabel(service.Status)</strong>
+                        @if (service.UpcomingClosures.Count > 0)
+                        {
+                            <strong class="status status-upcoming">Upcoming closure</strong>
+
+                        }
+                    </p>
                     @if (service.CurrentClosure is not null)
                     {
-                        @await Html.PartialAsync("_Closure", new ClosureDisplayModel(service.CurrentClosure, Model.ShowMessages))
+                        @await Html.PartialAsync("_Closure", service.CurrentClosure)
                     }
                     @if (service.UpcomingClosures.Count > 0)
                     {
-                        <h3>Upcoming disruptions</h3>
+                        <h3>Upcoming closures</h3>
                         <ul class="closures">
                             @foreach (var closure in service.UpcomingClosures)
                             {
                                 <li>
                                     <p><strong>@ServiceStatusModel.StatusLabel(closure.Status)</strong></p>
-                                    @await Html.PartialAsync("_Closure", new ClosureDisplayModel(closure, Model.ShowMessages))
+                                    @await Html.PartialAsync("_Closure", closure)
                                 </li>
                             }
                         </ul>

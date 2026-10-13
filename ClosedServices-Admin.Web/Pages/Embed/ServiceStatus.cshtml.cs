@@ -12,7 +12,6 @@ namespace ClosedServices_Admin.Pages.Embed;
 public sealed class ServiceStatusModel(IPublicStatusService statusService) : PageModel
 {
     public PublicStatusSnapshot? Snapshot { get; private set; }
-    public bool ShowMessages { get; private set; }
     public string? Error { get; private set; }
     public string RefreshUrl => $"{Request.PathBase}{Request.Path}{Request.QueryString}";
     public string AssetPath(string fileName) => Request.PathBase.Add($"/embed-assets/{fileName}").Value!;
@@ -28,7 +27,6 @@ public sealed class ServiceStatusModel(IPublicStatusService statusService) : Pag
             Error = error;
             return;
         }
-        ShowMessages = request!.ShowMessages;
         var result = await statusService.GetStatusAsync(request.Filter, cancellationToken);
         Snapshot = result.Snapshot;
         if (Snapshot is null)
@@ -42,7 +40,7 @@ public sealed class ServiceStatusModel(IPublicStatusService statusService) : Pag
     {
         "closed" => "Closed",
         "partiallyClosed" => "Partially closed",
-        _ => "No current disruption reported"
+        _ => "No disruption"
     };
 
     public static string FormatDate(DateTimeOffset value)
@@ -54,5 +52,3 @@ public sealed class ServiceStatusModel(IPublicStatusService statusService) : Pag
 
     public static string MachineDate(DateTimeOffset value) => value.ToString("O", CultureInfo.InvariantCulture);
 }
-
-public sealed record ClosureDisplayModel(PublicClosure Closure, bool ShowMessages);

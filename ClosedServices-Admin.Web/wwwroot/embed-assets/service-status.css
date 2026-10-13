@@ -42,17 +42,25 @@ h3 {
 }
 
 .status {
-    display: inline-block;
-    padding: .2rem .5rem;
-    background: #e8f0f8;
+  display: inline-block;
+  padding: .2rem .5rem;
+  background: #cce2d8;
+  color: #005a30;
 }
 
 .status-closed {
-    background: #f6d7d2;
+  background: #f6d7d2;
+  color: #2a0b06;
+}
+
+.status-upcoming {
+  background: #bbd4ea;
+  color: #0c2d4a;
 }
 
 .status-partiallyClosed {
-    background: #fff0c2;
+  background: #fff7bf;
+  color: #594d00;
 }
 
 .closures {

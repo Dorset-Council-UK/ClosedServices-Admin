@@ -1,8 +1,8 @@
-@model ClosedServices_Admin.Pages.Embed.ClosureDisplayModel
+@model ClosedServices_Admin.Data.PublicStatus.PublicClosure
 @using ClosedServices_Admin.Pages.Embed
 <p>
-    From <time datetime="@ServiceStatusModel.MachineDate(Model.Closure.EffectiveFrom)">@ServiceStatusModel.FormatDate(Model.Closure.EffectiveFrom)</time>
-    @if (Model.Closure.EffectiveTo is { } end)
+    From <time datetime="@ServiceStatusModel.MachineDate(Model.EffectiveFrom)">@ServiceStatusModel.FormatDate(Model.EffectiveFrom)</time>
+    @if (Model.EffectiveTo is { } end)
     {
         <span>until <time datetime="@ServiceStatusModel.MachineDate(end)">@ServiceStatusModel.FormatDate(end)</time>.</span>
     }
@@ -11,11 +11,11 @@
         <span>until further notice.</span>
     }
 </p>
-@if (!string.IsNullOrWhiteSpace(Model.Closure.Reason))
+@if (!string.IsNullOrWhiteSpace(Model.Reason))
 {
-    <p>Reason: @Model.Closure.Reason</p>
+    <p>Reason: @Model.Reason</p>
 }
-@if (Model.ShowMessages && !string.IsNullOrWhiteSpace(Model.Closure.Message))
+@if (!string.IsNullOrWhiteSpace(Model.Message))
 {
-    <p class="message">@Model.Closure.Message</p>
+    <p class="message">@Model.Message</p>
 }
