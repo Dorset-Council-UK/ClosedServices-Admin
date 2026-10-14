@@ -1,0 +1,87 @@
+name: Build and Publish
+
+on:
+  release:
+    types: [published]
+  pull_request:
+    branches:
+      - main
+
+# Required so we can upload assets to the *existing* Release using GITHUB_TOKEN
+permissions:
+  contents: write
+
+env:
+  DOTNET_VERSION: "10.0.x"
+
+jobs:
+  # --- Build & Test ---
+
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # On release events, build the exact tag that was released.
+          # On pull_request, this is ignored and checkout uses the PR ref as normal.
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Stamp version from release tag
+        if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v')
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          echo "Stamping version: $VERSION"
+          jq --arg v "$VERSION" '.ClosedServices.Version = $v' ClosedServices-Admin.Web/appsettings.json > tmp.json && mv tmp.json ClosedServices-Admin.Web/appsettings.json
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test --solution ClosedServices-Admin.slnx --no-build --configuration Release
+
+      # --- Publish & attach Release assets (only on Release publish) ---
+
+      - name: Publish ClosedServices-Admin.Web
+        if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v')
+        run: dotnet publish ClosedServices-Admin.Web/ClosedServices-Admin.Web.csproj --no-build --configuration Release --output ./publish/web
+
+      - name: Publish ClosedServices-Admin.Api
+        if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v')
+        run: dotnet publish ClosedServices-Admin.Api/ClosedServices-Admin.Api.csproj --no-build --configuration Release --output ./publish/api
+
+      - name: Zip Web publish output
+        if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v')
+        run: |
+          cd publish/web
+          zip -r "../../closedservices-admin-web-${{ github.event.release.tag_name }}.zip" .
+          cd ../..
+
+      - name: Zip API publish output
+        if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v')
+        run: |
+          cd publish/api
+          zip -r "../../closedservices-admin-api-${{ github.event.release.tag_name }}.zip" .
+          cd ../..
+
+      - name: Upload assets to the GitHub Release
+        if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          gh --version
+          gh release upload "$TAG" \
+            "closedservices-admin-web-$TAG.zip" \
+            "closedservices-admin-api-$TAG.zip" \
+            --clobber
