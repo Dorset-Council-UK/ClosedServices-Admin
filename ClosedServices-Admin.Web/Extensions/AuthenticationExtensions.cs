@@ -58,6 +58,7 @@ internal static class AuthenticationExtensions
             .Configure<IHttpClientFactory>((options, httpClientFactory) =>
             {
                 options.Backchannel = httpClientFactory.CreateClient("OpenIdConnectResilient");
+                // OpenID Connect adds PathBase to these middleware-managed redirect paths.
                 options.SignedOutRedirectUri = "/account/signed-out";
                 options.AccessDeniedPath = "/account/access-denied";
                 options.Events ??= new OpenIdConnectEvents();
@@ -65,6 +66,14 @@ internal static class AuthenticationExtensions
                 var existingOnRemoteFailureHandler = options.Events.OnRemoteFailure;
                 var existingOnTokenValidatedHandler = options.Events.OnTokenValidated;
 
+                // Workaround to fix intermittent AADSTS165000 on first login
+                // where user is prompted to login with <appId>@domain.com instead of their actual email address.
+                options.Events.OnRedirectToIdentityProvider = async context =>
+                {
+                    context.ProtocolMessage.Prompt = "select_account";
+                    if (existingRedirectHandler != null)
+                        await existingRedirectHandler(context);
+                };
                 // Workaround for Entra External ID stale session errors on first login of the day.
                 // When a user's Entra session expires overnight, the first authentication attempt can fail
                 // with AADSTS50133 (session invalid due to expiry) or AADSTS165000 (session context missing).
@@ -87,11 +96,12 @@ internal static class AuthenticationExtensions
                                 IsEssential = true,
                                 Secure = true,
                                 SameSite = SameSiteMode.Lax,
-                                MaxAge = TimeSpan.FromMinutes(5)
+                                MaxAge = TimeSpan.FromMinutes(5),
                             });
 
-                            var signInPath = context.Request.PathBase.Add("/MicrosoftIdentity/Account/SignIn");
-                            context.Response.Redirect($"{signInPath}?returnUrl=%2F");
+                            // SignIn defaults its redirectUri to the application's PathBase.
+                            var signInPath = context.Request.PathBase.Add("/sign-in");
+                            context.Response.Redirect(signInPath);
                             context.HandleResponse();
                         }
                         else
