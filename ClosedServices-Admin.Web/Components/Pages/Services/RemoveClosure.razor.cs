@@ -1,3 +1,4 @@
+using ClosedServices_Admin;
 using ClosedServices_Admin.Data.Enums;
 using ClosedServices_Admin.Data.Models;
 using ClosedServices_Admin.Data.Services;
@@ -37,7 +38,11 @@ namespace ClosedServices_Admin.Components.Pages.Services
 
         private bool isDeleting;
 
-        private string UpdatePageLink => $"services/{ServiceTypeRoute}/update/{ServiceId}";
+        private string DecodedServiceTypeRoute => ServiceTypeRouteHelper.DecodeSegment(ServiceTypeRoute);
+
+        private string EncodedServiceTypeRoute => ServiceTypeRouteHelper.EncodeSegment(DecodedServiceTypeRoute);
+
+        private string UpdatePageLink => $"services/{EncodedServiceTypeRoute}/update/{ServiceId}";
 
         private string ClosureStateText => ClosureToRemove is null ? string.Empty : FormatClosureState(ClosureToRemove.ClosureState);
 
@@ -50,7 +55,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
             isLoading = true;
             try
             {
-                var parsedServiceType = await servicesService.GetServiceTypeByName(ServiceTypeRoute);
+                var parsedServiceType = await servicesService.GetServiceTypeByName(DecodedServiceTypeRoute);
                 if (parsedServiceType is null)
                 {
                     navigationManager.NavigateTo("not-found");
