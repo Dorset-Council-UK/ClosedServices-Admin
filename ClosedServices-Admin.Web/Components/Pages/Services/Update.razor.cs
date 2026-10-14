@@ -1,3 +1,4 @@
+using ClosedServices_Admin;
 using ClosedServices_Admin.Data.Enums;
 using ClosedServices_Admin.Data.Models;
 using ClosedServices_Admin.Data.Services;
@@ -30,11 +31,15 @@ namespace ClosedServices_Admin.Components.Pages.Services
 
         private ServiceType? ParsedServiceType { get; set; }
 
-        private string ServiceTypeDisplayName => ParsedServiceType?.Name ?? ServiceTypeRoute;
+        private string DecodedServiceTypeRoute => ServiceTypeRouteHelper.DecodeSegment(ServiceTypeRoute);
+
+        private string EncodedServiceTypeRoute => ServiceTypeRouteHelper.EncodeSegment(ParsedServiceType?.Name ?? DecodedServiceTypeRoute);
+
+        private string ServiceTypeDisplayName => ParsedServiceType?.Name ?? DecodedServiceTypeRoute;
 
         private Service? Service { get; set; } = null!;
 
-        private string BackLink => $"services/{ServiceTypeRoute}";
+        private string BackLink => $"services/{EncodedServiceTypeRoute}";
         private bool isLoading = false;
         private ServiceCurrentStatus? CurrentStatus { get; set; }
         private ServiceOperatingHoursEvaluation? OperatingHoursEvaluation { get; set; }
@@ -54,7 +59,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
 
         private string RemovalConfirmationLink => RemovableClosure is null
             ? string.Empty
-            : $"services/{ServiceTypeRoute}/update/{ServiceId}/remove-closure/{RemovableClosure.Id}";
+            : $"services/{EncodedServiceTypeRoute}/update/{ServiceId}/remove-closure/{RemovableClosure.Id}";
 
         private string ClosureStatusText => RemovableClosure is null
             ? string.Empty
@@ -75,7 +80,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
             isLoading = true;
             try
             {
-                var parsedServiceType = await servicesService.GetServiceTypeByName(ServiceTypeRoute);
+                var parsedServiceType = await servicesService.GetServiceTypeByName(DecodedServiceTypeRoute);
                 if (parsedServiceType is null)
                 {
                     navigationManager.NavigateTo("not-found");
@@ -122,7 +127,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
                     .Where(closure => !closure.IsCurrent && closure.Id != RemovableClosure?.Id)
                     .Select(closure => new UpcomingClosureDisplayItem(
                         closure,
-                        $"services/{ServiceTypeRoute}/update/{ServiceId}/remove-closure/{closure.Id}",
+                        $"services/{EncodedServiceTypeRoute}/update/{ServiceId}/remove-closure/{closure.Id}",
                         $"Remove {FormatClosureState(closure.ClosureState)} closure on {FormatClosureDate(closure.EffectiveFrom)} for this {ServiceTypeSingularLower}"))
                     .ToArray();
 

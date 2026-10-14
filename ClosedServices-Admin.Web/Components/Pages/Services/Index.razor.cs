@@ -1,3 +1,4 @@
+using ClosedServices_Admin;
 using ClosedServices_Admin.Data.Enums;
 using ClosedServices_Admin.Data.Models;
 using ClosedServices_Admin.Data.Services;
@@ -22,7 +23,11 @@ namespace ClosedServices_Admin.Components.Pages.Services
 
         private ServiceType? ParsedServiceType { get; set; }
 
-        private string ServiceTypeDisplayName => ParsedServiceType?.Name ?? ServiceTypeRoute;
+        private string DecodedServiceTypeRoute => ServiceTypeRouteHelper.DecodeSegment(ServiceTypeRoute);
+
+        private string EncodedServiceTypeRoute => ServiceTypeRouteHelper.EncodeSegment(ParsedServiceType?.Name ?? DecodedServiceTypeRoute);
+
+        private string ServiceTypeDisplayName => ParsedServiceType?.Name ?? DecodedServiceTypeRoute;
 
         private IReadOnlyCollection<ServiceStatusOverview> ServiceOverviews { get; set; } = [];
 
@@ -35,7 +40,7 @@ namespace ClosedServices_Admin.Components.Pages.Services
             {
 
 
-                var parsedServiceType = await servicesService.GetServiceTypeByName(ServiceTypeRoute);
+                var parsedServiceType = await servicesService.GetServiceTypeByName(DecodedServiceTypeRoute);
                 if (parsedServiceType is null)
                 {
                     navigationManager.NavigateTo("not-found");
