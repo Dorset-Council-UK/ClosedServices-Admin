@@ -24,6 +24,7 @@ builder
 builder.Services.AddScoped<IServicesService, ServicesService>();
 builder.Services.AddScoped<IServiceStatusService, ServiceStatusService>();
 builder.Services.AddScoped<IServiceOperatingHoursService, ServiceOperatingHoursService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IValidator<UpdateServiceStatusFormModel>, UpdateServiceStatusFormModelValidator>();
 builder.Services.AddPublicStatusQueries();
 builder.Services.AddPublicStatusRateLimiting(

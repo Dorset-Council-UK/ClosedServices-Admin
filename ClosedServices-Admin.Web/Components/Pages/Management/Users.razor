@@ -1,0 +1,40 @@
+﻿@using Microsoft.AspNetCore.Components.QuickGrid;
+@page "/management/users"
+@* @attribute [Authorize(Roles = "ADMIN")] *@
+
+<PageTitle>Manage users - Closed Services Admin</PageTitle>
+<GdsBackLink Href="" />
+<GdsHeading Level="1">Manage users</GdsHeading>
+
+<GdsSpinner Show="IsBusy"></GdsSpinner>
+
+@if(AllUsers is not null)
+{
+    <GdsHeading Level="2">Active users</GdsHeading>
+    @if (ActiveUsers is null || ActiveUsers.Count == 0)
+    {
+        <p>No active users found.</p>
+    }
+    else
+    {
+        <QuickGrid Items="ActiveUsers.AsQueryable()">
+            <PropertyColumn Property="@(p => p.Id)" Sortable="true" />
+            <PropertyColumn Property="@(p => p.DisplayName)" Sortable="true" />
+            <PropertyColumn Property="@(p => p.Mail)" Sortable="true" />
+        </QuickGrid>
+    }
+
+    <GdsHeading Level="2">Available users</GdsHeading>
+    @if (AvailableUsers is null || AvailableUsers.Count == 0)
+    {
+        <p>No available users found.</p>
+    }
+    else
+    {
+        <QuickGrid Items="AvailableUsers.AsQueryable()">
+            <PropertyColumn Property="@(p => p.Id)" Sortable="true" />
+            <PropertyColumn Property="@(p => p.DisplayName)" Sortable="true" />
+            <PropertyColumn Property="@(p => p.Mail)" Sortable="true" />
+        </QuickGrid>
+    }
+}
