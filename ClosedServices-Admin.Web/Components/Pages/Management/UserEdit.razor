@@ -1,75 +1,48 @@
-﻿@* @page "/Management/Users/Edit/{Id}"
-@attribute [Authorize(Policy = "ManagementStepUp")]
+﻿@page "/Management/Users/Edit/{Id}"
+@* @attribute [Authorize(Roles = "ADMIN")] *@
 
-<PageTitle>@localizer["User Edit Title", User?.DisplayName ?? ""]</PageTitle>
-<div>
-    <Breadcrumb Items="NavItems"></Breadcrumb>
-</div>
+<PageTitle>Manage user - Closed Services Admin</PageTitle>
+<GdsBackLink Href="management/users" />
+<GdsHeading Level="1">Manage user</GdsHeading>
 
-<h1>@localizer["User Edit Title", User?.DisplayName ?? ""]</h1>
-
-@if (IsBusy)
-{
-    <p class="fs-4">
-        <div class="spinner-border" role="status"></div> @localizer["Loading Text"]
-    </p>
-}
+<GdsSpinner Show="IsBusy"></GdsSpinner>
 
 @if(User is not null)
 {
-    <div class="row mt-4 mb-2">
-        <div class="col-lg-8">
-            <p>@localizer["User Edit Text"]</p>
-            <table class="table table-striped">
-                <tbody>
-                    <tr><th>@localizer["User ID Label"]</th><td>@User.Id</td></tr>
-                    <tr><th>@localizer["Name Label"]</th><td>@User.DisplayName</td></tr>
-                    <tr>
-                        <th>@localizer["Email Label"]</th>
-                        <td>@(!string.IsNullOrEmpty(User.Mail) ?  User.Mail : (User.OtherMails is not null ? string.Join(',', User.OtherMails) : ""))
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h2>@localizer["User Roles Title"]</h2>
-            <p>@localizer["User Roles Text"]</p>
-
-            @if(ErrorMessage is not null)
-            {
-                <Alert Color="AlertColor.Danger">@ErrorMessage</Alert>
-            }
-            <EditForm OnSubmit="OnSubmit" Model="UserRoles">
-
-                @if (AvailableRoles is not null && AvailableRoles.Count != 0)
-                {
-                    <div class="mb-3">
-                        <fieldset>
-                            <legend class="form-label fs-6">@localizer["User Roles Label"]</legend>
-
-                            @foreach (var AvailableRole in AvailableRoles)
-                            {
-                                var selected = SelectedUserRoleIds.Contains(AvailableRole.Id);
-
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="@AvailableRole.Id" checked="@selected" id="AvailableRole__@AvailableRole.Id" @onchange="(e) => {RolesChanged(AvailableRole, e);}">
-                                    <label class="form-check-label" for="AvailableRole__@AvailableRole.Id">
-                                        @AvailableRole.RoleName
-                                    </label>
-                                </div>
-
-                            }
-                        </fieldset>
-                    </div>
-
-                    <Button Type="ButtonType.Submit" Color="ButtonColor.Primary" disabled="@IsBusy">@localizer["Update Label"]</Button>
-                }
-
-            </EditForm>
-
+    <dl class="govuk-summary-list">
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+                Name
+            </dt>
+            <dd class="govuk-summary-list__value">
+                @User.DisplayName
+            </dd>
         </div>
-    </div>
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+                Email address
+            </dt>
+            <dd class="govuk-summary-list__value">
+                @(!string.IsNullOrEmpty(User.Mail) ?  User.Mail : (User.OtherMails is not null ? string.Join(',', User.OtherMails) : ""))
+            </dd>
+        </div>
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+                User ID
+            </dt>
+            <dd class="govuk-summary-list__value">
+                @User.Id
+            </dd>
+        </div>
+    </dl>
+
+
+    <GdsHeading Level="2">User permissions</GdsHeading>
+    <p>Edit this users permission to services</p>
+
+    <!--TODO Add ability to select a service type, then choose either the entire service or individual services-->
+
+
 }
 
 
- *@
