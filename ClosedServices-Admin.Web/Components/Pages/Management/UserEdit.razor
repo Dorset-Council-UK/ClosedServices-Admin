@@ -1,0 +1,96 @@
+﻿@page "/Management/Users/Edit/{Id}"
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Manage user - Closed Services Admin</PageTitle>
+<GdsBackLink Href="management/users" />
+<GdsHeading Level="1">Manage user</GdsHeading>
+
+<GdsSpinner Show="IsBusy"></GdsSpinner>
+
+@if (ErrorMessage is not null)
+{
+    <div role="alert" aria-live="assertive">
+        <GdsNotificationBanner BannerTitle="There is a problem">
+            <p>@ErrorMessage</p>
+        </GdsNotificationBanner>
+    </div>
+}
+
+@if (User is not null && Selection is not null)
+{
+    <dl class="govuk-summary-list">
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+                Name
+            </dt>
+            <dd class="govuk-summary-list__value">
+                @User.DisplayName
+            </dd>
+        </div>
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+                Email address
+            </dt>
+            <dd class="govuk-summary-list__value">
+                @(!string.IsNullOrEmpty(User.Mail) ?  User.Mail : (User.OtherMails is not null ? string.Join(',', User.OtherMails) : ""))
+            </dd>
+        </div>
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+                User ID
+            </dt>
+            <dd class="govuk-summary-list__value">
+                @User.Id
+            </dd>
+        </div>
+    </dl>
+
+
+    <GdsHeading Level="2">User permissions</GdsHeading>
+    <p>Select the services this user can manage. Selecting all services of a type also grants access to future services of that type.</p>
+    <p>Leave all checkboxes unchecked to remove all service permissions. Inactive services are included.</p>
+
+    <EditForm Model="Selection" OnValidSubmit="OnSubmit">
+        <GdsErrorSummary />
+        <fieldset class="govuk-fieldset" disabled="@IsBusy" aria-busy="@IsBusy.ToString().ToLowerInvariant()">
+            <legend class="govuk-visually-hidden">Service permissions</legend>
+            @foreach (var group in Selection.Groups)
+            {
+                <GdsFormGroup @key="group.Id">
+                    <GdsFieldsetGroup>
+                        <GdsFieldsetLegend><GdsFieldsetHeading Level="3">@group.Name</GdsFieldsetHeading></GdsFieldsetLegend>
+                        <GdsCheckboxes>
+                            <GdsCheckboxItem>
+                                <GdsInputCheckbox Id="@($"type-{group.Id:N}")" @bind-Value="group.AllServices" OnChanged="selected => OnTypeChanged(group, selected)" />
+                                <GdsCheckboxLabel Text="@($"All {group.Name} services")" />
+                                <GdsCheckboxHint>Includes all current and future services of this type.</GdsCheckboxHint>
+                            </GdsCheckboxItem>
+                            @if (!group.AllServices)
+                            {
+                                @foreach (var service in group.Services)
+                                {
+                                    <GdsCheckboxItem @key="service.Id">
+                                        <GdsInputCheckbox Id="@($"service-{service.Id:N}")" @bind-Value="service.IsSelected" OnChanged="selected => OnServiceChanged(group, service, selected)" />
+                                        <GdsCheckboxLabel Text="@service.Name" />
+                                    </GdsCheckboxItem>
+                                }
+                            }
+                        </GdsCheckboxes>
+                        @if (!group.AllServices && group.Services.Count == 0)
+                        {
+                            <p>No services currently exist for this type. You can still grant access to future services.</p>
+                        }
+                    </GdsFieldsetGroup>
+                </GdsFormGroup>
+            }
+            @if (Selection.Groups.Count == 0)
+            {
+                <p>No service types are available. Saving will remove this user's service permissions.</p>
+            }
+            <GdsButton IsSubmit Text="Save permissions" />
+            <button class="govuk-button govuk-button--secondary" type="button" @onclick="Cancel">Cancel</button>
+        </fieldset>
+    </EditForm>
+}
+
+

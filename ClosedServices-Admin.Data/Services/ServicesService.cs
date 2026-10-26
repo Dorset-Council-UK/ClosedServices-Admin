@@ -18,6 +18,17 @@ namespace ClosedServices_Admin.Data.Services
                 .ConfigureAwait(false);
         }
 
+        public async Task<IReadOnlyCollection<ServiceType>> GetServiceTypes(CancellationToken ct = default)
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(ct);
+            return await context.ServiceTypes
+                .AsNoTracking()
+                .OrderBy(type => type.Order)
+                .ThenBy(type => type.Name)
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
+        }
+
         public async Task<ServiceType?> GetServiceTypeByName(string name, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(name))

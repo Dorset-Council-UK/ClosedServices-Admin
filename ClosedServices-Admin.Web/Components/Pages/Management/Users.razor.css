@@ -1,0 +1,199 @@
+::deep .quickgrid[theme="gds"] {
+  font-family: arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media print {
+  ::deep .quickgrid[theme="gds"] {
+    font-family: sans-serif;
+  }
+}
+
+::deep .quickgrid[theme="gds"] {
+  font-weight: 400;
+  font-size: 1.1875rem;
+  line-height: 1.3157894737;
+}
+
+@media print {
+  ::deep .quickgrid[theme="gds"] {
+    font-size: 14pt;
+    line-height: 1.15;
+  }
+}
+
+::deep .quickgrid[theme="gds"] {
+  color: #0b0c0c;
+}
+
+@media print {
+  ::deep .quickgrid[theme="gds"] {
+    color: #000000;
+  }
+}
+
+::deep .quickgrid[theme="gds"] {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 40.0625em) {
+  ::deep .quickgrid[theme="gds"] {
+    margin-bottom: 30px;
+  }
+}
+
+::deep .quickgrid[theme="gds"] {
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+@media (max-width: 40.0525em) {
+  ::deep .quickgrid[theme="gds"].govuk-table--small-text-until-tablet {
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+}
+
+@media print and (max-width: 40.0525em) {
+  ::deep .quickgrid[theme="gds"].govuk-table--small-text-until-tablet {
+    font-size: 14pt;
+    line-height: 1.2;
+  }
+}
+
+::deep .quickgrid[theme="gds"] > thead > tr > th {
+  font-weight: 700;
+}
+
+::deep .quickgrid[theme="gds"] > thead > tr > th,
+::deep .quickgrid[theme="gds"] > tbody > tr > td {
+  padding: 10px 20px 10px 0;
+  border-bottom: 1px solid #b1b4b6;
+  text-align: left;
+  vertical-align: top;
+}
+
+::deep .quickgrid[theme="gds"] > tbody > tr > td.govuk-table__cell--numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+::deep .quickgrid[theme="gds"] > thead > tr > th.govuk-table__header--numeric,
+::deep .quickgrid[theme="gds"] > thead > tr > th.govuk-table__cell--numeric,
+::deep .quickgrid[theme="gds"] > tbody > tr > td.govuk-table__cell--numeric {
+  text-align: right;
+}
+
+::deep .quickgrid[theme="gds"] > thead > tr > th:last-child,
+::deep .quickgrid[theme="gds"] > tbody > tr > td:last-child {
+  padding-right: 0;
+}
+
+::deep .quickgrid[theme="gds"] > caption {
+  font-weight: 700;
+  display: table-caption;
+  text-align: left;
+}
+
+::deep .quickgrid[theme="gds"] > caption.govuk-table__caption--xl,
+::deep .quickgrid[theme="gds"] > caption.govuk-table__caption--l,
+::deep .quickgrid[theme="gds"] > caption.govuk-table__caption--m {
+  margin-bottom: 15px;
+}
+
+::deep .quickgrid[theme="gds"] > caption.govuk-table__caption--xl {
+  font-size: 2rem;
+  line-height: 1.09375;
+}
+
+@media (min-width: 40.0625em) {
+  ::deep .quickgrid[theme="gds"] > caption.govuk-table__caption--xl {
+    font-size: 3rem;
+    line-height: 1.0416666667;
+  }
+}
+
+@media print {
+  ::deep .quickgrid[theme="gds"] > caption.govuk-table__caption--xl {
+    font-size: 32pt;
+    line-height: 1.15;
+  }
+}
+
+::deep .quickgrid[theme="gds"] > caption.govuk-table__caption--l {
+  font-size: 1.6875rem;
+  line-height: 1.1111111111;
+}
+
+@media (min-width: 40.0625em) {
+  ::deep .quickgrid[theme="gds"] > caption.govuk-table__caption--l {
+    font-size: 2.25rem;
+    line-height: 1.1111111111;
+  }
+}
+
+@media print {
+  ::deep .quickgrid[theme="gds"] > caption.govuk-table__caption--l {
+    font-size: 24pt;
+    line-height: 1.05;
+  }
+}
+
+::deep .quickgrid[theme="gds"] > caption.govuk-table__caption--m {
+  font-size: 1.3125rem;
+  line-height: 1.1904761905;
+}
+
+@media (min-width: 40.0625em) {
+  ::deep .quickgrid[theme="gds"] > caption.govuk-table__caption--m {
+    font-size: 1.5rem;
+    line-height: 1.25;
+  }
+}
+
+@media print {
+  ::deep .quickgrid[theme="gds"] > caption.govuk-table__caption--m {
+    font-size: 18pt;
+    line-height: 1.15;
+  }
+}
+
+::deep .quickgrid[theme="gds"] .col-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font: inherit;
+  color: inherit;
+}
+
+::deep .quickgrid[theme="gds"] button.col-title {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+::deep .quickgrid[theme="gds"] button.col-title:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 0.15em;
+}
+
+::deep .quickgrid[theme="gds"] button.col-title:focus {
+  outline: 3px solid transparent;
+  color: #0b0c0c;
+  background-color: #ffdd00;
+  box-shadow: 0 -2px #ffdd00, 0 4px #0b0c0c;
+  text-decoration: none;
+}
+
+::deep .quickgrid[theme="gds"] .sort-indicator {
+  flex-shrink: 0;
+}
+
+::deep .quickgrid[theme="gds"] > thead > tr > th.govuk-table__header--numeric .col-header-content,
+::deep .quickgrid[theme="gds"] > thead > tr > th.govuk-table__cell--numeric .col-header-content {
+  justify-content: flex-end;
+}

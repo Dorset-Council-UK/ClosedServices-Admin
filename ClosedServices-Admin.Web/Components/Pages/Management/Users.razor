@@ -1,0 +1,47 @@
+﻿@using Microsoft.AspNetCore.Components.QuickGrid;
+@using Microsoft.Graph.Models;
+@page "/management/users"
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Manage users - Closed Services Admin</PageTitle>
+<GdsBackLink Href="" />
+<GdsHeading Level="1">Manage users</GdsHeading>
+
+<GdsSpinner Show="IsBusy"></GdsSpinner>
+
+@if(AllUsers is not null)
+{
+    <GdsHeading Level="2">Active users</GdsHeading>
+    @if (ActiveUsers is null || ActiveUsers.Count == 0)
+    {
+        <p>No active users found.</p>
+    }
+    else
+    {
+        <div>
+            <QuickGrid Items="ActiveUsers.AsQueryable()" Class="govuk-table" Theme="gds">
+                <TemplateColumn Context="ActiveUsers" Title="Name" Sortable="true" IsDefaultSortColumn SortBy="@(GridSort<User>.ByAscending(user => user.DisplayName))">
+                    <a class="govuk-link" href="management/users/edit/@ActiveUsers.Id">@ActiveUsers.DisplayName</a>
+                </TemplateColumn>
+                <PropertyColumn Property="@(p => p.Mail)" Sortable="true" />
+            </QuickGrid>
+        </div>
+    }
+
+    <GdsHeading Level="2">Available users</GdsHeading>
+    @if (AvailableUsers is null || AvailableUsers.Count == 0)
+    {
+        <p>No available users found.</p>
+    }
+    else
+    {
+        <div>
+            <QuickGrid Items="AvailableUsers.AsQueryable()" Class="govuk-table" Theme="gds">
+                <TemplateColumn Context="AvailableUsers" Title="Name" Sortable="true" IsDefaultSortColumn SortBy="@(GridSort<User>.ByAscending(user => user.DisplayName))">
+                    <a class="govuk-link" href="management/users/edit/@AvailableUsers.Id">@AvailableUsers.DisplayName</a>
+                </TemplateColumn>
+                <PropertyColumn Property="@(p => p.Mail)" Sortable="true" />
+            </QuickGrid>
+        </div>
+    }
+}
