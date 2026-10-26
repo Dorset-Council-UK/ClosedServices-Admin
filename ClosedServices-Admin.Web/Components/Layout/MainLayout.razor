@@ -6,8 +6,13 @@
 
 <GdsHeader ServiceName="Closed Services" ServiceUrl="" LogoUrl="https://gistaticprod.blob.core.windows.net/giframeworkmaps/version-logos/Dorset council logo_white_d.svg">
     <NavLinks>
-        <AuthorizeView>
+        <AuthorizeView Context="outerContext">
             <Authorized>
+                <AuthorizeView Roles="Admin" Context="innerContext">
+                    <Authorized>
+                        <GdsHeaderNavLink Href="management/users" Match="NavLinkMatch.All">Manage users</GdsHeaderNavLink>
+                    </Authorized>
+                </AuthorizeView>
                 <GdsHeaderNavLink Href="account/my-account" Match="NavLinkMatch.All">My account</GdsHeaderNavLink>
                 <span data-enhance-nav="false">
                     <GdsHeaderNavLink Href="sign-out" Match="NavLinkMatch.All">Sign out</GdsHeaderNavLink>
