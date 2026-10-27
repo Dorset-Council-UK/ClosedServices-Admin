@@ -1,10 +1,11 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Sections
+@using Microsoft.Extensions.Options
 @inherits LayoutComponentBase
 
 <GdsSkipLink Href="@GetSkipLinkHref()" />
 
-<GdsHeader ServiceName="Closed Services" ServiceUrl="" LogoUrl="https://gistaticprod.blob.core.windows.net/giframeworkmaps/version-logos/Dorset council logo_white_d.svg">
+<GdsHeader ServiceName="Closed Services" ServiceUrl="" LogoUrl="https://gistaticprod.blob.core.windows.net/static/logos/dorset-council/Dorset%20council%20logo_white_d.svg">
     <NavLinks>
         <AuthorizeView Context="outerContext">
             <Authorized>
@@ -27,6 +28,18 @@
     </NavLinks>
 </GdsHeader>
 <GdsContainer AdditionalCssClasses="flex-fill">
+    @if (Options.Value.IsBeta)
+    {
+        if (Uri.TryCreate(Options.Value.FeedbackLink, UriKind.Absolute, out var feedbackUri))
+        {
+            <GdsPhaseBanner Phase="GdsPhaseBanner.Phases.Beta" FeedbackLink="@feedbackUri"></GdsPhaseBanner>
+        }
+        else
+        {
+            <GdsPhaseBanner Phase="GdsPhaseBanner.Phases.Beta"></GdsPhaseBanner>
+
+        }
+    }
     <SectionOutlet SectionName="Layout.GdsBreadcrumbs" />
 
     <GdsMainWrapper AdditionalCssClasses="govuk-body govuk-main-wrapper--l" AutoSpacing id="main-content" role="main">
@@ -49,12 +62,17 @@
 <GdsFooter>
     <Meta>
     <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
-        <GdsLink class="govuk-footer__link govuk-link-image" Href="/" title="Closed Services Admin">
-            Closed Services Admin
+        <GdsLink class="govuk-footer__link govuk-link-image" Href="https://github.com/Dorset-Council-UK/" title="Go to the Dorset Council GitHub repository">
+            <img src="https://gistaticprod.blob.core.windows.net/static/logos/dorset-council/Dorset%20council%20logo_colour.svg" alt="Dorset Council Logo" height="80">
         </GdsLink>
     </div>
     <div class="govuk-footer__meta-item">
-        <div>Dorset Council</div>
+        <ul class="govuk-list govuk-!-margin-bottom-0">
+            <li>
+                Designed and developed by <GdsLink class="govuk-footer__link" Href="https://github.com/Dorset-Council-UK/" title="Go to the Dorset Council GitHub repository">Dorset Council and other contributors</GdsLink>
+            </li>
+            <li>&copy; Dorset Council @(DateTimeOffset.UtcNow.Year)</li>
+        </ul>
     </div>
 </Meta>
 </GdsFooter>
@@ -65,6 +83,9 @@
 
     [Inject]
     private NavigationManager Navigation { get; set; } = default!;
+
+    [Inject]
+    private IOptions<ClosedServices_Admin_Shared.Options.ClosedServicesOptions> Options { get; set; } = default!;
 
     private GdsPhaseBanner.Phases _phase => Env.IsProduction() ? GdsPhaseBanner.Phases.Alpha : GdsPhaseBanner.Phases.Development;
 
