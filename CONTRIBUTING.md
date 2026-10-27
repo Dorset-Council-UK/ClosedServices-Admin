@@ -23,7 +23,7 @@ This page describes what you need to know to contribute code to CSIDE as a devel
 
 ## Contributor License Agreement
 
-Your contribution will be under our [license](LICENCE) as per [GitHub's terms of service](https://help.github.com/articles/github-terms-of-service/#6-contributions-under-repository-license).
+Your contribution will be under our [license](LICENSE.txt) as per [GitHub's terms of service](https://help.github.com/articles/github-terms-of-service/#6-contributions-under-repository-license).
 
 
 ## Pull request guidelines

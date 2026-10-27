@@ -15,7 +15,7 @@ In your database, create a user for Entity Framework to use and give it permissi
 
 You can either let Entity Framework create your schema for you, or create it yourself. 
 #### Create the schema yourself
-Create a schema within your database called cside. To avoid complex permissions, make the user account you created the owner of the schema.
+Create a schema within your database called closedservices. To avoid complex permissions, make the user account you created the owner of the schema.
 
 #### Let EF create the schema for you
 In order for EF to be able to create the schema, your user will need permission on the database to create schemas.
@@ -57,7 +57,7 @@ Once you've got a service set up, you'll need to add a number of settings to you
 ### Running the application
 Once you’ve followed the steps above, you’re ready to run the application. 
 
-This applications uses [Aspire](https://aspire.dev). Follow the instructions in the Aspire documentation to ensure you can use Aspire.
+This application uses [Aspire](https://aspire.dev). Follow the instructions in the Aspire documentation to ensure you can use Aspire.
 
 Provided you have Docker or Podman installed, you should be able to just run the AppHost project and it will build and run the application. You can also run the application directly from Visual Studio or using the .NET CLI.
 
@@ -66,6 +66,6 @@ This will give you a minimal starting application, but there are a couple more s
 ### Giving yourself permission
 When the app runs, you should be able to login, but you will be unable to do anything. You need to give yourself an appropriate role in the application before you'll be able to do anything. 
 
-To give yourself full admin priviliges (including managing other users), go into your Azure Enterprise Application and give yourself the role 'Admin'.
+To give yourself full admin privileges (including managing other users), go into your Azure Enterprise Application and give yourself the role 'Admin'.
 
 To just assign yourself to a service, go into the database, and insert a record into the `ServiceUsers` table with your user ID and the service you want to manage. You can find your user ID by clicking 'My account' in the top right of the app.
