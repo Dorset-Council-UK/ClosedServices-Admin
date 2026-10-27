@@ -1,3 +1,15 @@
-﻿<GdsHeading Level="1">Access Denied</GdsHeading>
+﻿@using Microsoft.Extensions.Options
+@inject IOptions<ClosedServices_Admin_Shared.Options.ClosedServicesOptions> Options;
+
+<GdsHeading Level="1">Access Denied</GdsHeading>
 ﻿
-<GdsWarning Text="You don't have access to this page. Contact your system administrator if you think this is wrong." />
+<GdsWarning Text="You don't have access to this page." />
+
+@if (Uri.TryCreate(Options.Value.ContactLink, UriKind.Absolute, out var contactUri))
+{
+    <p>If this is wrong, <GdsLink Href="@contactUri.ToString()">contact your system administrator</GdsLink>.</p>
+}
+else
+{
+    <p>If this is wrong, contact your system administrator.</p>
+}

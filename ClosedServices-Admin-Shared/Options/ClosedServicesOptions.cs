@@ -14,7 +14,9 @@ public record ClosedServicesOptions
 
     public string AppName { get; init; } = "Closed Services Admin";
     public string Version { get; init; } = "DEVELOPMENT";
-
+    public string FeedbackLink { get; init; } = "";
+    public string ContactLink { get; init; } = "";
+    public bool IsBeta { get; init; }
     /// <summary>
     /// The base path the app is hosted under.
     /// Always normalised (see <see cref="NormalisePathBase"/>) to either:

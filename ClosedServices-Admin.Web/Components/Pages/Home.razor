@@ -19,7 +19,14 @@
             {
                 
                 <GdsWarning Text="You do not have permission to update any services" />
-                <p>If this is wrong, contact your system administrator.</p>
+                @if (Uri.TryCreate(Options.Value.ContactLink, UriKind.Absolute, out var contactUri))
+                {
+                    <p>If this is wrong, <GdsLink Href="@contactUri.ToString()">contact your system administrator</GdsLink>.</p>
+                }
+                else
+                {
+                    <p>If this is wrong, contact your system administrator.</p>
+                }
             }
             else
             {
@@ -51,7 +58,10 @@
         <p><GdsLink Href="sign-in">Sign in</GdsLink> to update your service</p>
         <GdsHeading Level="2" Size="GdsSize.Medium">What is Closed Services Admin?</GdsHeading>
         <p>Closed Services Admin is a portal that allows authorized users to manage and update closed services within the organization.</p>
-        <p>If you manage a service, and don't have an account, you can request access by contacting [contact goes here].</p>
+        @if (Uri.TryCreate(Options.Value.ContactLink, UriKind.Absolute, out var contactUri))
+        {
+            <p>If you manage a service, and don't have an account, you can request access by <GdsLink Href="@contactUri.ToString()">contacting your system administrator</GdsLink>.</p>
+        }
     </NotAuthorized>
 </AuthorizeView>
 

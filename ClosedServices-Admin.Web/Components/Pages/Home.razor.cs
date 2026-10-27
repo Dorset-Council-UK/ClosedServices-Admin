@@ -2,6 +2,7 @@ using ClosedServices_Admin.Data.Models;
 using ClosedServices_Admin.Data.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
 namespace ClosedServices_Admin.Components.Pages
@@ -12,6 +13,9 @@ namespace ClosedServices_Admin.Components.Pages
     {
         [CascadingParameter]
         private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+        [Inject]
+        private IOptions<ClosedServices_Admin_Shared.Options.ClosedServicesOptions> Options { get; set; } = default!;
 
         private IReadOnlyCollection<Service> Services { get; set; } = Array.Empty<Service>();
         private bool isLoading = false;
