@@ -22,6 +22,7 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
         postgres.UseNetTopologySuite();
         postgres.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
     }).UseSnakeCaseNamingConvention());
+builder.EnrichNpgsqlDbContext<ApplicationDbContext>();
 
 var networking = section.GetSection(NetworkingOptions.SectionName).Get<NetworkingOptions>();
 if (networking?.UseForwardedHeadersMiddleware == true)

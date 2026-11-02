@@ -1,6 +1,5 @@
-using ClosedServices_Admin.MigrationService;
 using ClosedServices_Admin.Data;
-using ClosedServices_Admin.Data.Enums;
+using ClosedServices_Admin.MigrationService;
 using ClosedServices_Admin_Shared.Options;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,6 +32,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         })
         .UseSnakeCaseNamingConvention();
 });
+builder.EnrichNpgsqlDbContext<ApplicationDbContext>();
 
 builder.Services.AddOpenTelemetry()
     .WithTracing(tracing => tracing.AddSource(Worker.ActivitySourceName));

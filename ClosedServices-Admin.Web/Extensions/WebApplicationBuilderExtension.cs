@@ -162,6 +162,7 @@ internal static class WebApplicationBuilderExtension
 
             options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
         });
+        builder.EnrichNpgsqlDbContext<ApplicationDbContext>();
 
         return builder;
     }
