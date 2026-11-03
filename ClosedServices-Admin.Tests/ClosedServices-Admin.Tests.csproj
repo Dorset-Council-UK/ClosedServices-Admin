@@ -6,16 +6,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+	<IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Testing" Version="13.6.4" />
     <PackageReference Include="coverlet.collector" Version="10.1.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.13" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.13" />
     <PackageReference Include="xunit.v3" Version="4.0.2" />
   </ItemGroup>
 
@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ClosedServices-Admin.AppHost\ClosedServices-Admin.AppHost.csproj" />
     <ProjectReference Include="..\ClosedServices-Admin.Data\ClosedServices-Admin.Data.csproj" />
     <ProjectReference Include="..\ClosedServices-Admin.Web\ClosedServices-Admin.Web.csproj" />
     <ProjectReference Include="..\ClosedServices-Admin.Api\ClosedServices-Admin.Api.csproj" />
